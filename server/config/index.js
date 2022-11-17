@@ -3,8 +3,8 @@ dotenv.config();
 
 const config = {
   db: {
-    url: 'localhost:3001',
-    name: 'bnb_chain',
+    url: process.env.DB_URL,
+    name: process.env.DB_NAME,
   },
 };
 
