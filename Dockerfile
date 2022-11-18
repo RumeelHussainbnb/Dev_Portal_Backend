@@ -9,6 +9,6 @@ WORKDIR /app
 COPY . .
 RUN npm --clean install
 
-EXPOSE 3001
+EXPOSE 4001
 
 CMD [ "npm", "run", "start"]
