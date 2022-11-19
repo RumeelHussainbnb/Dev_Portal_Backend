@@ -32,7 +32,7 @@ export default {
         Description: data.Description,
         SK: get_random_sk,
         ContentType: data.ContentType,
-        ContentStatus: 'inactive',
+        ContentStatus: data.ContentStatus,
         ContentMarkdown: '',
         Position: position,
         List: data.List,
