@@ -1,8 +1,15 @@
 FROM node:14
+
+ENV DB_URL None
+ENV DB_NAME None
+ENV HOME_URL None
+ENV BEARER_TOKEN None
+ENV PORT None
+
 WORKDIR /app
 COPY . .
 RUN npm --clean install
 
-EXPOSE 3001
+EXPOSE 4001
 
 CMD [ "npm", "run", "start"]
