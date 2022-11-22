@@ -7,6 +7,7 @@ import tags from '../utils/tags.js';
 import SelectedTags from '../utils/selected-tags.js';
 import validateKey from '../utils/validate-key.js';
 import ContentTypes from '../utils/content-types.js';
+import GetImageFromSiteUrl from '../utils/get-image-from-site.js';
 
 export default {
   onGetContent: async (req, res) => {
@@ -22,8 +23,12 @@ export default {
   },
   onCreateContent: async (req, res) => {
     try {
-      const get_random_sk = await random_sk();
       const data = req.body;
+      const images = await GetImageFromSiteUrl(data.Url);
+      //Dont get first image if we have more then one image on site to ignore logos
+      const image =
+        images.length >= 1 ? images[1] : images.length > 0 ? images[0] : '';
+      const get_random_sk = await random_sk();
       const position = await calculatePositionNo(data.ContentType);
       const content = await Content.create({
         PlaylistID: data.ContentType == 'playlist' ? data.PlaylistID : '',
@@ -40,6 +45,7 @@ export default {
         Tags: data.Tags,
         Vertical: data.Vertical,
         SpecialTag: data.SpecialTag,
+        Img: image,
       });
 
       res.status(201).json({ success: true, data: content });
