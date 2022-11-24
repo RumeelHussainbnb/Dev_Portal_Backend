@@ -7,7 +7,6 @@ import tags from '../utils/tags.js';
 import SelectedTags from '../utils/selected-tags.js';
 import validateKey from '../utils/validate-key.js';
 import ContentTypes from '../utils/content-types.js';
-import GetImageFromSiteUrl from '../utils/get-image-from-site.js';
 
 export default {
   onGetContent: async (req, res) => {
