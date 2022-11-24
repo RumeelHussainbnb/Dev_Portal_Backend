@@ -24,10 +24,10 @@ export default {
   onCreateContent: async (req, res) => {
     try {
       const data = req.body;
-      const images = await GetImageFromSiteUrl(data.Url);
+      //const images = await GetImageFromSiteUrl(data.Url);
       //Dont get first image if we have more then one image on site to ignore logos
-      const image =
-        images.length >= 1 ? images[1] : images.length > 0 ? images[0] : '';
+      const image = data.ImageUrl;
+      //images.length >= 1 ? images[1] : images.length > 0 ? images[0] : '';
       const get_random_sk = await random_sk();
       const position = await calculatePositionNo(data.ContentType);
       const content = await Content.create({
