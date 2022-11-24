@@ -17,7 +17,6 @@
     "jsonwebtoken": "8.5.1",
     "mongoose": "5.9.18",
     "morgan": "1.9.1",
-    "puppeteer": "^19.2.2",
     "socket.io": "2.3.0",
     "twitter-api-sdk": "^1.2.1",
     "uuid": "8.1.0"

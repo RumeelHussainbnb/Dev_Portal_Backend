@@ -9,7 +9,6 @@ ENV PORT None
 WORKDIR /app
 COPY . .
 
-RUN npm install puppeteer
 RUN npm --clean install
 
 EXPOSE 4001
