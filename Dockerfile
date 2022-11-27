@@ -8,6 +8,7 @@ ENV PORT None
 
 WORKDIR /app
 COPY . .
+
 RUN npm --clean install
 
 EXPOSE 3001

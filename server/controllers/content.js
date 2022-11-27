@@ -22,8 +22,12 @@ export default {
   },
   onCreateContent: async (req, res) => {
     try {
-      const get_random_sk = await random_sk();
       const data = req.body;
+      //const images = await GetImageFromSiteUrl(data.Url);
+      //Dont get first image if we have more then one image on site to ignore logos
+      const image = data.ImageUrl;
+      //images.length >= 1 ? images[1] : images.length > 0 ? images[0] : '';
+      const get_random_sk = await random_sk();
       const position = await calculatePositionNo(data.ContentType);
       const content = await Content.create({
         PlaylistID: data.ContentType == 'playlist' ? data.PlaylistID : '',
@@ -40,6 +44,7 @@ export default {
         Tags: data.Tags,
         Vertical: data.Vertical,
         SpecialTag: data.SpecialTag,
+        Img: image,
       });
 
       res.status(201).json({ success: true, data: content });
