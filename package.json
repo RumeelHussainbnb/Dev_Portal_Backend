@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon server/index.js",
-    "start:server": "node  server/index.js"
+    "start:server": "node server/index.js"
   },
   "dependencies": {
     "@withvoid/make-validation": "1.0.5",
