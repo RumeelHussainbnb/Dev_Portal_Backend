@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:18-alpine
 
 ENV DB_URL None
 ENV DB_NAME None
@@ -9,9 +9,8 @@ ENV PORT None
 WORKDIR /app
 COPY . .
 
-RUN npm install puppeteer
 RUN npm --clean install
 
 EXPOSE 4001
 
-CMD [ "npm", "run", "start"]
+CMD [ "npm", "run", "start:server"]
