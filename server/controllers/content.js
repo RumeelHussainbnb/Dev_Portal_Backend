@@ -55,7 +55,7 @@ export default {
   },
   onUpdateContent: async (req, res) => {
     try {
-      const data = req.body[0];
+      const data = req.body;
       await Content.updateMany(
         { ContentType: data.ContentType },
         { $set: { SpecialTag: '0' } }
