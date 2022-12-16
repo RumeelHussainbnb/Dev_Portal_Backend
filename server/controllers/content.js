@@ -119,9 +119,14 @@ export default {
   },
   onGetContentWithSpecialTagNEW: async (req, res) => {
     try {
-      const contents = await Content.find({ SpecialTag: 'New' }).sort({
-      CreatedAt: -1,
-    });
+      const contents = await Content.find({
+        SpecialTag: 'New',
+        ContentStatus: {
+          $ne: 'submitted',
+        },
+      }).sort({
+        CreatedAt: -1,
+      });
 
       res.status(200).json(contents);
     } catch (error) {
