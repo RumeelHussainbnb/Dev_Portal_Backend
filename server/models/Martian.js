@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
 const MartianSchema = new mongoose.Schema({
+  ImageUrl: {
+    type: String,
+    trim: true,
+    maxlength: [2048, 'URL cannot be more than 2048 characters'],
+  },
   FirstName: {
     type: String,
     required: [true, 'Please add First Name'],
