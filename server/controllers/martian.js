@@ -27,6 +27,20 @@ export default {
     }
   },
 
+  onUpdateMartian: async (req, res) => {
+    try {
+      const data = req.body;
+
+      const martian = await Martian.findByIdAndUpdate(data.id, data, {
+        returnOriginal: false,
+      });
+
+      res.status(200).json(martian);
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
+    }
+  },
+
   onGetMartians: async (req, res) => {
     try {
       const keyword = req.query.keyword;
