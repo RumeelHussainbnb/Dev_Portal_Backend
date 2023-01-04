@@ -35,7 +35,7 @@ export default {
         returnOriginal: false,
       });
 
-      res.status(200).json(martian);
+      res.status(201).json({ success: true, data: martian });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
