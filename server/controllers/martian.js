@@ -1,5 +1,9 @@
+// third part
+import bcrypt from 'bcryptjs';
+
 // models
 import Martian from '../models/Martian.js';
+import User from '../models/User.js';
 
 import { generateUploadURL } from '../utils/s3.js';
 
@@ -7,6 +11,9 @@ export default {
   onCreateMartian: async (req, res) => {
     try {
       const data = req.body;
+      let user;
+      //check for user in db
+      if (data.Email) user = await User.findOne({ Email: data.Email });
 
       const martian = await Martian.create({
         ImageUrl: data.ImageUrl,
@@ -20,6 +27,44 @@ export default {
         Languages: data.Languages,
         BioGraphy: data.BioGraphy,
       });
+
+      //if user not found
+      if (!user) {
+        const hashPassword = await bcrypt.hash('test123', 10);
+        //create user
+        user = await User.create({
+          Username: data.FirstName,
+          MartianId: martian.id,
+          Email: data.Email,
+          Password: hashPassword,
+          ProfilePicture: '',
+          Token: '',
+          TokenFirstCreatedAt: '',
+          PublicKey: '',
+          Role: 'Author',
+          TokenUpdatedAt: '',
+          CreatedAt: '',
+          Author: {
+            SocialLinks: [],
+            Member: [],
+            Contributions: [],
+            RecognizationsAndAwards: [],
+            Certification: [],
+          },
+        });
+      }
+      //if have user update martian key
+      else {
+        const user = await User.findOneAndUpdate(
+          { Email: data.Email },
+          {
+            $set: {
+              MartianId: martian.id,
+            },
+          },
+          { new: true }
+        );
+      }
 
       res.status(201).json({ success: true, data: martian });
     } catch (error) {
@@ -67,6 +112,90 @@ export default {
       totalMartains = await Martian.countDocuments(filterObject).exec();
       result.totalMartains = totalMartains;
       res.status(201).json({ success: true, data: result });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
+    }
+  },
+  onGetMartianById: async (req, res) => {
+    try {
+      const martian = await Martian.findById({ _id: req.query.id });
+      res.status(201).json({ success: true, data: martian });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
+    }
+  },
+
+  onAddActivity: async (req, res) => {
+    try {
+      const data = req.body;
+      const martian = await Martian.findOneAndUpdate(
+        { _id: data.martianId },
+        {
+          $push: {
+            Activities: [
+              {
+                date: data.date,
+                activity: data.activity,
+                activityLink: data.activityLink,
+                type: data.type,
+                primaryContributionArea: data.primaryContributionArea,
+                additionalContributionArea: data.additionalContributionArea,
+              },
+            ],
+          },
+        },
+        { new: true }
+      );
+
+      res.status(201).json({ success: true, data: martian });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
+    }
+  },
+
+  onEditActivity: async (req, res) => {
+    try {
+      const data = req.body;
+      const martian = await Martian.findOneAndUpdate(
+        { _id: data.martianId, 'Activities._id': data.id },
+        {
+          $set: {
+            'Activities.$.date': data.date,
+            'Activities.$.activity': data.activity,
+            'Activities.$.activityLink': data.activityLink,
+            'Activities.$.type': data.type,
+            'Activities.$.primaryContributionArea':
+              data.primaryContributionArea,
+            'Activities.$.additionalContributionArea':
+              data.additionalContributionArea,
+          },
+        },
+        { new: true }
+      );
+      res.status(201).json({ success: true, data: martian });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
+    }
+  },
+
+  onDeleteActivity: async (req, res) => {
+    try {
+      const data = req.query;
+      const martian = await Martian.findByIdAndUpdate(
+        data.martianId,
+
+        {
+          $pull: {
+            Activities: {
+              _id: data.id,
+            },
+          },
+        },
+
+        { new: true }
+      );
+
+      res.status(201).json({ success: true, data: martian });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
