@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import config from './index.js';
 
-const CONNECTION_URL = `mongodb://127.0.0.1:27017/bnb`;
+const CONNECTION_URL = `mongodb+srv://${config.db.url}/${config.db.name}?retryWrites=true&w=majority`;
+
 mongoose.connect(CONNECTION_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,

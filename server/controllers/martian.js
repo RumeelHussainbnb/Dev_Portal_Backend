@@ -118,7 +118,39 @@ export default {
   },
   onGetMartianById: async (req, res) => {
     try {
-      const martian = await Martian.findById({ _id: req.query.id });
+      let martian = await Martian.findById(
+        { _id: req.query.id },
+        {
+          Activities: { $slice: [0, 10] },
+        }
+      );
+      const martianActivitySize = await Martian.findById(
+        { _id: req.query.id },
+        {
+          ActivitiesSize: { $size: '$Activities' },
+        }
+      );
+
+      res
+        .status(201)
+        .json({ success: true, data: martian, martianActivitySize });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
+    }
+  },
+
+  onGetMartianActivityByPage: async (req, res) => {
+    try {
+      const page = parseInt(req.query.pageNumber) || 1;
+      const perPage = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * perPage;
+
+      let martian = await Martian.findById(
+        { _id: req.query.id },
+        {
+          Activities: { $slice: [skip, perPage] },
+        }
+      );
       res.status(201).json({ success: true, data: martian });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
