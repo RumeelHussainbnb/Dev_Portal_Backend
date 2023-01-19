@@ -128,7 +128,7 @@ export default {
   },
   onRegister: async (req, res) => {
     // extracting data from body
-    const { PublicKey } = req.body;
+      const { PublicKey } = req.body;
 
     try {
       // Email
