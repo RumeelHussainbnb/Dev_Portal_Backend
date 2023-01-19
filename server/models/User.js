@@ -1,27 +1,18 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 // local
-// import { Member, Role } from '../constant/enums';
+import { Member, Role, RecognizationsAndAwards } from "../constant/enums.js";
 const UserSchema = new mongoose.Schema({
   Username: {
     type: String,
-    required: [true, 'Please specify a username'],
     unique: false,
-    maxlength: [100, 'Username cannot be more than 100 characters'],
-  },
-  MartianId: {
-    type: mongoose.Schema.ObjectId,
+    maxlength: [100, "Username cannot be more than 100 characters"],
   },
   Email: {
     type: String,
     trim: true,
     lowercase: true,
-    unique: true,
-    required: [true, 'Email is required'],
-  },
-  Password: {
-    type: String,
-    maxlength: [200, 'Media name cannot be more than 200 characters'],
+    unique: true
   },
   ProfilePicture: {
     type: String,
@@ -29,7 +20,7 @@ const UserSchema = new mongoose.Schema({
   Token: {
     type: String,
     trim: true,
-    maxlength: [500, 'Token cannot be more than 500 characters'],
+    maxlength: [500, "Token cannot be more than 500 characters"],
   },
   TokenFirstCreatedAt: {
     type: Date,
@@ -38,14 +29,13 @@ const UserSchema = new mongoose.Schema({
   },
   PublicKey: {
     type: String,
-    unique: false,
-    maxlength: [100, 'PublicKey should not be more than 100 characters'],
+    unique: true,
+    maxlength: [100, "PublicKey should not be more than 100 characters"],
   },
-  //   Role: {
-  //     type: String,
-  //     enum: Role,
-  //     default: Role.Author,
-  //   },
+  Role: {
+    type: String,
+    enum: Role,
+  },
   TokenUpdatedAt: {
     type: Date,
   },
@@ -57,14 +47,26 @@ const UserSchema = new mongoose.Schema({
   Bio: {
     type: String,
     required: false,
-    maxlength: [300, 'Bio cannot be more than 300 characters'],
+    maxlength: [300, "Bio cannot be more than 300 characters"],
   },
-  //   Author: {
-  //     SocialLinks: [{ Link: String, Name: String }],
-  //     Member: { type: String, enum: Member, default: Member.Silver },
-  //     RecognizationsAndAwards: [{ Type: String, enum: RecognizationsAndAwards }],
-  //     Certification: [{ Name: String, Organization: String }],
-  //   },
+  Country: {
+    type: String,
+  },
+  ForgetPasswordLinkExpire: {
+    type: Date,
+  },
+  ForgetPasswordLink: {
+    type: String,
+  },
+  Skils: { type: Array },
+  Author: {
+    SocialLinks: [{ Link: String, Name: String }],
+    Member: { type: String, enum: Member },
+    RecognizationsAndAwards: [{ type: String, enum: RecognizationsAndAwards }],
+    Certification: [{ Name: String, Organization: String }],
+    MostPopular: [{ Name: String, Organization: String }],
+    Contributions: [{ Name: String, Organization: String }],
+  },
 });
 
 // UserSchema.path('Username').validate(function (value) {
@@ -75,4 +77,4 @@ const UserSchema = new mongoose.Schema({
 //   return true;
 // }, 'Spaces not allowed in Username field. Please use - or _ or number');
 
-export default mongoose.model('User', UserSchema);
+export default mongoose.model("User", UserSchema);
