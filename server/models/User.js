@@ -1,18 +1,21 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 // local
-import { Member, Role, RecognizationsAndAwards } from "../constant/enums.js";
+import { Member, Role, RecognizationsAndAwards } from '../constant/enums.js';
 const UserSchema = new mongoose.Schema({
   Username: {
     type: String,
     unique: false,
-    maxlength: [100, "Username cannot be more than 100 characters"],
+    maxlength: [100, 'Username cannot be more than 100 characters'],
+  },
+  MartianId: {
+    type: mongoose.Schema.ObjectId,
   },
   Email: {
     type: String,
     trim: true,
     lowercase: true,
-    unique: true
+    unique: true,
   },
   ProfilePicture: {
     type: String,
@@ -20,7 +23,7 @@ const UserSchema = new mongoose.Schema({
   Token: {
     type: String,
     trim: true,
-    maxlength: [500, "Token cannot be more than 500 characters"],
+    maxlength: [500, 'Token cannot be more than 500 characters'],
   },
   TokenFirstCreatedAt: {
     type: Date,
@@ -30,7 +33,7 @@ const UserSchema = new mongoose.Schema({
   PublicKey: {
     type: String,
     unique: true,
-    maxlength: [100, "PublicKey should not be more than 100 characters"],
+    maxlength: [100, 'PublicKey should not be more than 100 characters'],
   },
   Role: {
     type: String,
@@ -47,7 +50,7 @@ const UserSchema = new mongoose.Schema({
   Bio: {
     type: String,
     required: false,
-    maxlength: [300, "Bio cannot be more than 300 characters"],
+    maxlength: [300, 'Bio cannot be more than 300 characters'],
   },
   Country: {
     type: String,
@@ -77,4 +80,4 @@ const UserSchema = new mongoose.Schema({
 //   return true;
 // }, 'Spaces not allowed in Username field. Please use - or _ or number');
 
-export default mongoose.model("User", UserSchema);
+export default mongoose.model('User', UserSchema);

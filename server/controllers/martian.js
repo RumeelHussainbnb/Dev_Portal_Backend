@@ -1,6 +1,6 @@
 // third part
 import bcrypt from 'bcryptjs';
-
+import { Member } from '../constant/enums.js';
 // models
 import Martian from '../models/Martian.js';
 import User from '../models/User.js';
@@ -30,23 +30,21 @@ export default {
 
       //if user not found
       if (!user) {
-        const hashPassword = await bcrypt.hash('test123', 10);
         //create user
         user = await User.create({
           Username: data.FirstName,
           MartianId: martian.id,
           Email: data.Email,
-          Password: hashPassword,
           ProfilePicture: '',
           Token: '',
           TokenFirstCreatedAt: '',
-          PublicKey: '',
-          Role: 'Author',
+          PublicKey: data.publicKey,
+          Role: 'Martian',
           TokenUpdatedAt: '',
           CreatedAt: '',
           Author: {
             SocialLinks: [],
-            Member: [],
+            Member: Member[0],
             Contributions: [],
             RecognizationsAndAwards: [],
             Certification: [],
