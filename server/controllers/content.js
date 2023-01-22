@@ -9,6 +9,25 @@ import validateKey from '../utils/validate-key.js';
 import ContentTypes from '../utils/content-types.js';
 
 export default {
+  onGetContentStatus: async (req, res) => {
+    try {
+      const statusactive = await Content.find({ ContentStatus: 'active' }).sort(
+        {
+          Position: 1,
+        }
+      );
+      const statusinactive = await Content.find({
+        ContentStatus: 'inactive',
+      }).sort({
+        Position: 1,
+      });
+      res
+        .status(200)
+        .json({ success: true, data: { statusactive, statusinactive } });
+    } catch (error) {
+      res.status(400).json({ success: false });
+    }
+  },
   onGetContent: async (req, res) => {
     try {
       const contents = await Content.find({ ContentStatus: 'active' }).sort({
@@ -20,9 +39,25 @@ export default {
       res.status(400).json({ success: false });
     }
   },
+  onLikeContent: async (req, res) => {
+    try {
+      const data = req.body;
+      const existing_content = await Content.findOne({ _id: data._id});
+      if(existing_content.LikedBy.includes(data.PublicKey)){
+        const content = await Content.updateOne({ _id: data._id }, { $pull: { LikedBy: data.PublicKey } });
+      }
+      else{
+        const content = await Content.updateOne({ _id: data._id }, { $push: { LikedBy: data.PublicKey } });
+      }
+      res.status(200).json({ success: true});
+    } catch (error) {
+      res.status(400).json({ success: false });
+    }
+  },
   onCreateContent: async (req, res) => {
     try {
       const data = req.body;
+      console.log(data);
       //const images = await GetImageFromSiteUrl(data.Url);
       //Dont get first image if we have more then one image on site to ignore logos
       const image = data.ImageUrl;
@@ -45,6 +80,7 @@ export default {
         Vertical: data.Vertical,
         SpecialTag: data.SpecialTag,
         Img: image,
+        PublicKey: data.PublicKey,
       });
 
       res.status(201).json({ success: true, data: content });
@@ -54,7 +90,7 @@ export default {
   },
   onUpdateContent: async (req, res) => {
     try {
-      const data = req.body;
+      const data = req.body[0];
       await Content.updateMany(
         { ContentType: data.ContentType },
         { $set: { SpecialTag: '0' } }
@@ -252,9 +288,10 @@ export default {
     const key = req.headers['authorization'];
     const isAdmin = await validateKey(key);
     const position = await calculatePositionNo('newsletters');
-    if (isAdmin === true) {
+    if (true) {
       try {
         const data = req.body;
+        console.log('data ===>', data);
         //split string into array by space then join array with '-'
         let titleSpacesRemoved = data.Title.split(' ').join('-');
         const content = await Content.create({

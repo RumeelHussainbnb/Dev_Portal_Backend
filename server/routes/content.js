@@ -14,10 +14,11 @@ router
   .get('/types', content.onGetContentTypes)
   .post('/types', content.onPostContentWithType)
   .get('/check', content.onGetContentWithType)
+  .get('/status', content.onGetContentStatus)
   .get('/:type', content.onGetContentWithType)
   .get('/', content.onGetContent)
   .post('/', content.onCreateContent)
   .put('/', content.onUpdateContent)
-  
+  .post('/like', content.onLikeContent);
 
 export default router;

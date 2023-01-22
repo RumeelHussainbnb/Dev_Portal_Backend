@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
 
 // local
-// import { Member, Role } from '../constant/enums';
+import { Member, Role, RecognizationsAndAwards } from '../constant/enums.js';
 const UserSchema = new mongoose.Schema({
   Username: {
     type: String,
-    required: [true, 'Please specify a username'],
     unique: false,
     maxlength: [100, 'Username cannot be more than 100 characters'],
   },
@@ -17,11 +16,6 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     lowercase: true,
     unique: true,
-    required: [true, 'Email is required'],
-  },
-  Password: {
-    type: String,
-    maxlength: [200, 'Media name cannot be more than 200 characters'],
   },
   ProfilePicture: {
     type: String,
@@ -38,14 +32,13 @@ const UserSchema = new mongoose.Schema({
   },
   PublicKey: {
     type: String,
-    unique: false,
+    unique: true,
     maxlength: [100, 'PublicKey should not be more than 100 characters'],
   },
-  //   Role: {
-  //     type: String,
-  //     enum: Role,
-  //     default: Role.Author,
-  //   },
+  Role: {
+    type: String,
+    enum: Role,
+  },
   TokenUpdatedAt: {
     type: Date,
   },
@@ -59,12 +52,24 @@ const UserSchema = new mongoose.Schema({
     required: false,
     maxlength: [300, 'Bio cannot be more than 300 characters'],
   },
-  //   Author: {
-  //     SocialLinks: [{ Link: String, Name: String }],
-  //     Member: { type: String, enum: Member, default: Member.Silver },
-  //     RecognizationsAndAwards: [{ Type: String, enum: RecognizationsAndAwards }],
-  //     Certification: [{ Name: String, Organization: String }],
-  //   },
+  Country: {
+    type: String,
+  },
+  ForgetPasswordLinkExpire: {
+    type: Date,
+  },
+  ForgetPasswordLink: {
+    type: String,
+  },
+  Skils: { type: Array },
+  Author: {
+    SocialLinks: [{ Link: String, Name: String }],
+    Member: { type: String, enum: Member },
+    RecognizationsAndAwards: [{ type: String, enum: RecognizationsAndAwards }],
+    Certification: [{ Name: String, Organization: String }],
+    MostPopular: [{ Name: String, Organization: String }],
+    Contributions: [{ Name: String, Organization: String }],
+  },
 });
 
 // UserSchema.path('Username').validate(function (value) {
