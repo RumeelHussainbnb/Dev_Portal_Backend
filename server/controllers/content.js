@@ -42,14 +42,20 @@ export default {
   onLikeContent: async (req, res) => {
     try {
       const data = req.body;
+      let content;
       const existing_content = await Content.findOne({ _id: data._id});
       if(existing_content.LikedBy.includes(data.PublicKey)){
-        const content = await Content.updateOne({ _id: data._id }, { $pull: { LikedBy: data.PublicKey } });
+          content = await Content.findOneAndUpdate({ _id: data._id }, { $pull: { LikedBy: data.PublicKey } }, {
+            returnOriginal: false,
+          });
       }
       else{
-        const content = await Content.updateOne({ _id: data._id }, { $push: { LikedBy: data.PublicKey } });
+          content = await Content.findOneAndUpdate({  _id: data._id }, { $push: { LikedBy: data.PublicKey } }, {
+          returnOriginal: false,
+        });
+
       }
-      res.status(200).json({ success: true});
+      res.status(200).json({ success: true, data: content});
     } catch (error) {
       res.status(400).json({ success: false });
     }
@@ -57,7 +63,7 @@ export default {
   onCreateContent: async (req, res) => {
     try {
       const data = req.body;
-      console.log(data);
+
       //const images = await GetImageFromSiteUrl(data.Url);
       //Dont get first image if we have more then one image on site to ignore logos
       const image = data.ImageUrl;
