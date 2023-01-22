@@ -39,6 +39,21 @@ export default {
       res.status(400).json({ success: false });
     }
   },
+  onLikeContent: async (req, res) => {
+    try {
+      const data = req.body;
+      const existing_content = await Content.findOne({ _id: data._id});
+      if(existing_content.LikedBy.includes(data.PublicKey)){
+        const content = await Content.updateOne({ _id: data._id }, { $pull: { LikedBy: data.PublicKey } });
+      }
+      else{
+        const content = await Content.updateOne({ _id: data._id }, { $push: { LikedBy: data.PublicKey } });
+      }
+      res.status(200).json({ success: true});
+    } catch (error) {
+      res.status(400).json({ success: false });
+    }
+  },
   onCreateContent: async (req, res) => {
     try {
       const data = req.body;

@@ -18,6 +18,7 @@ router
   .get('/:type', content.onGetContentWithType)
   .get('/', content.onGetContent)
   .post('/', content.onCreateContent)
-  .put('/', content.onUpdateContent);
+  .put('/', content.onUpdateContent)
+  .post('/like', content.onLikeContent);
 
 export default router;

@@ -109,6 +109,10 @@ const ContentSchema = new mongoose.Schema({
     type: String,
     maxlength: [100, "PublicKey should not be more than 100 characters"],
   },
+  LikedBy: {
+    type: Array,
+    require: false,
+  }
 });
 
 ContentSchema.path("SK").validate(function (value) {
