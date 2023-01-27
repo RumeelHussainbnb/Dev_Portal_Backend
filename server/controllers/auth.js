@@ -126,67 +126,87 @@ export default {
       });
     }
   },
-  onRegister: async (req, res) => {
-    // extracting data from body
-      const { PublicKey } = req.body;
+    onRegister: async (req, res) => {
+        // extracting data from body
+        const { PublicKey } = req.body;
 
-    try {
-      // Email
-      let user = await User.findOne({ PublicKey: PublicKey });
-      // if exists
-      if (user) {
-        return res.status(400).json({
-          success: false,
-          message: "User already exists!",
-        });
-      }
-      user = await User.create({
-        Username: "",
-        Email: "",
-        ProfilePicture: "",
-        Token: "",
-        TokenFirstCreatedAt: "",
-        PublicKey: PublicKey,
-        Role: "User",
-        TokenUpdatedAt: "",
-        CreatedAt: new Date(),
-        Bio: "",
-        Country: "",
-        Skils: [],
-        Author: {
-          SocialLinks: [],
-          Member: Member[0],
-          RecognizationsAndAwards: [],
-          Certification: [],
-          MostPopular: [],
-          Contributions: [],
-        },
-      });
+        try {
+            // Email
+            let user = await User.findOne({ PublicKey: PublicKey });
+            // if exists
+            if (user) {
+                // return the user 
 
-      const token = jwt.sign(
-        {
-          userId: user._id,
-          publicKey: user.PublicKey,
-        },
-        KEY,
-        {
-          expiresIn: "12h",
+                const token = jwt.sign(
+                    {
+                        userId: user._id,
+                        publicKey: user.PublicKey,
+                    },
+                    KEY,
+                    {
+                        expiresIn: "12h",
+                    }
+                );
+                res.status(200).json({
+                    success: true,
+                    data: user,
+                    token: token,
+                    isNewUser: false,
+                    message: "Successful",
+                });
+
+
+            } else {
+                user = await User.create({
+                    Username: "",
+                    Email: "",
+                    ProfilePicture: "",
+                    Token: "",
+                    TokenFirstCreatedAt: "",
+                    PublicKey: PublicKey,
+                    Role: "User",
+                    TokenUpdatedAt: "",
+                    CreatedAt: new Date(),
+                    Bio: "",
+                    Country: "",
+                    Skils: [],
+                    Author: {
+                        SocialLinks: [],
+                        Member: Member[0],
+                        RecognizationsAndAwards: [],
+                        Certification: [],
+                        MostPopular: [],
+                        Contributions: [],
+                    },
+                });
+
+                const token = jwt.sign(
+                    {
+                        userId: user._id,
+                        publicKey: user.PublicKey,
+                    },
+                    KEY,
+                    {
+                        expiresIn: "12h",
+                    }
+                );
+                res.status(201).json({
+                    success: true,
+                    data: user,
+                    token: token,
+                    isNewUser: true,
+                    message: "Successful",
+                });
+            }
+
+        } catch (error) {
+            console.log("error ===>", error);
+            res.status(400).json({
+                success: false,
+                error: "Something went wrong please try again",
+            });
         }
-      );
-      res.status(201).json({
-        success: true,
-        data: user,
-        token: token,
-        message: "Successful",
-      });
-    } catch (error) {
-      console.log("error ===>", error);
-      res.status(400).json({
-        success: false,
-        error: "Something went wrong please try again",
-      });
-    }
-  },
+    },
   onForgetPassword: async (req, res) => {
     const { Email } = req.body;
 
