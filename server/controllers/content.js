@@ -11,14 +11,14 @@ import ContentTypes from '../utils/content-types.js';
 export default {
   onGetContentStatus: async (req, res) => {
     try {
-      const statusactive = await Content.find({ ContentStatus: 'active' }).sort(
+      const statusactive = await Content.find({ ContentStatus: 'active' }).populate('PublicKey').sort(
         {
           Position: 1,
         }
       );
       const statusinactive = await Content.find({
         ContentStatus: 'inactive',
-      }).sort({
+      }).populate('PublicKey').sort({
         Position: 1,
       });
       res
@@ -30,7 +30,7 @@ export default {
   },
   onGetContent: async (req, res) => {
     try {
-      const contents = await Content.find({ ContentStatus: 'active' }).sort({
+      const contents = await Content.find({ ContentStatus: 'active' }).populate('PublicKey').sort({
         Position: 1,
       });
 
@@ -115,9 +115,9 @@ export default {
     var contents;
     try {
       if ('url' in req.query) {
-        contents = await Content.findOne({ Url: req.query.url });
+        contents = await Content.findOne({ Url: req.query.url }).populate('PublicKey');
       } else {
-        contents = await Content.find({ ContentStatus: req.params.type });
+        contents = await Content.find({ ContentStatus: req.params.type }).populate('PublicKey');
       }
 
       res.status(200).json(contents);
@@ -152,7 +152,7 @@ export default {
   },
   onGetContentWithSpecialTagHOT: async (req, res) => {
     try {
-      const contents = await Content.find({ SpecialTag: 'Hot' });
+      const contents = await Content.find({ SpecialTag: 'Hot' }).populate('PublicKey');
 
       res.status(200).json(contents);
     } catch (error) {
@@ -166,7 +166,7 @@ export default {
         ContentStatus: {
           $ne: 'submitted',
         },
-      }).sort({
+      }).populate('PublicKey').sort({
         CreatedAt: -1,
       });
 
@@ -177,7 +177,7 @@ export default {
   },
   onGetList: async (req, res) => {
     try {
-      const contents = await Content.find({ Lists: req.params.listName });
+      const contents = await Content.find({ Lists: req.params.listName }).populate('PublicKey');
 
       res.status(200).json(contents);
     } catch (error) {
@@ -196,7 +196,7 @@ export default {
           contents = await Content.find({
             ContentType: req.params.type,
             ContentStatus: 'active',
-          }).sort({ Position: -1 });
+          }).populate('PublicKey').sort({ Position: -1 });
 
           if ('tags' in req.query && req.query.tags.length > 1) {
             multipleExist = req.query.tags.every((value) => {
@@ -208,7 +208,7 @@ export default {
               ContentType: req.params.type,
               Tags: { $in: req.params.tags },
               ContentStatus: 'active',
-            }).sort({ Position: -1 });
+            }).populate('PublicKey').sort({ Position: -1 });
           }
 
           res.status(200).json(contents);
@@ -224,7 +224,7 @@ export default {
             Tags: { $in: req.query.tags },
             ContentStatus: 'active',
             ContentType: req.params.type,
-          }).sort({ Position: -1 });
+          }).populate('PublicKey').sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
@@ -237,7 +237,7 @@ export default {
             Tags: { $in: req.query.tags },
             ContentStatus: 'active',
             ContentType: req.params.type,
-          }).sort({ Position: -1 });
+          }).populate('PublicKey').sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
@@ -249,7 +249,7 @@ export default {
             SpecialTag: req.query.specialTags,
             ContentStatus: 'active',
             ContentType: req.params.type,
-          }).sort({ Position: -1 });
+          }).populate('PublicKey').sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
@@ -258,7 +258,7 @@ export default {
       } // Done till here
     } else if (req.params.videoID === undefined) {
       try {
-        contents = await Content.find({ PlaylistID: req.params.type });
+        contents = await Content.find({ PlaylistID: req.params.type }).populate('PublicKey');
 
         res.status(200).json(contents);
       } catch (error) {
@@ -270,7 +270,7 @@ export default {
           ContentType: req.params.type,
           SK: req.params.videoID,
           ContentStatus: 'active',
-        }).sort({ Position: -1 });
+        }).populate('PublicKey').sort({ Position: -1 });
 
         res.status(200).json(contents);
       } catch (error) {
@@ -283,7 +283,7 @@ export default {
       const contents = await Content.find(
         { ContentType: 'newsletters', ContentStatus: 'active' },
         {}
-      ).sort({ Position: -1 });
+      ).populate('PublicKey').sort({ Position: -1 });
       //const contents = await Content.find({}, { _id: 0}).sort({ CreatedAt: -1, ContentType: "newsletter"});
       res.status(200).json(contents);
     } catch (error) {
