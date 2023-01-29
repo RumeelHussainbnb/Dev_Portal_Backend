@@ -15,10 +15,13 @@ router
   .post('/types', content.onPostContentWithType)
   .get('/check', content.onGetContentWithType)
   .get('/status', content.onGetContentStatus)
+  .get('/topContent', content.onTopContent)
+  .get('/topContributor', content.onTopContributor)
   .get('/:type', content.onGetContentWithType)
   .get('/', content.onGetContent)
   .post('/', content.onCreateContent)
   .put('/', content.onUpdateContent)
-  .post('/like', content.onLikeContent);
+  .post('/like', content.onLikeContent)
+  .post('/view', content.onViewContent);
 
 export default router;

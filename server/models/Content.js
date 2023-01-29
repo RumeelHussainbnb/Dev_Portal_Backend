@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+const { Schema } = mongoose;
 
 const ContentSchema = new mongoose.Schema({
   Title: {
@@ -105,11 +106,12 @@ const ContentSchema = new mongoose.Schema({
     default: Date.now,
     require: true,
   },
-  PublicKey: {
-    type: String,
-    maxlength: [100, "PublicKey should not be more than 100 characters"],
-  },
+  User: { type: Schema.Types.ObjectId, ref: 'User' },
   LikedBy: {
+    type: Array,
+    require: false,
+  },
+  ViewedBy: {
     type: Array,
     require: false,
   }

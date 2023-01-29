@@ -1,5 +1,6 @@
 // models
 import Content from '../models/Content.js';
+import User from '../models/User.js';
 import random_sk from '../utils/generate-random-sk.js';
 import calculatePositionNo from '../utils/calculate-position-no.js';
 import ContentType from '../models/ContentTypes.js';
@@ -11,14 +12,14 @@ import ContentTypes from '../utils/content-types.js';
 export default {
   onGetContentStatus: async (req, res) => {
     try {
-      const statusactive = await Content.find({ ContentStatus: 'active' }).populate('PublicKey').sort(
+      const statusactive = await Content.find({ ContentStatus: 'active' }).populate('User').sort(
         {
           Position: 1,
         }
       );
       const statusinactive = await Content.find({
         ContentStatus: 'inactive',
-      }).populate('PublicKey').sort({
+      }).populate('User').sort({
         Position: 1,
       });
       res
@@ -30,7 +31,7 @@ export default {
   },
   onGetContent: async (req, res) => {
     try {
-      const contents = await Content.find({ ContentStatus: 'active' }).populate('PublicKey').sort({
+      const contents = await Content.find({ ContentStatus: 'active' }).populate('User').sort({
         Position: 1,
       });
 
@@ -57,6 +58,118 @@ export default {
       }
       res.status(200).json({ success: true, data: content});
     } catch (error) {
+      res.status(400).json({ success: false });
+    }
+  },
+  onViewContent: async (req, res) => {
+    try {
+      const data = req.body;
+      const content = await Content.findOneAndUpdate({  _id: data._id }, { $push: { ViewedBy: data.PublicKey } }, {
+        returnOriginal: false,
+      });
+
+      res.status(200).json({ success: true, data: content});
+    } catch (error) {
+      res.status(400).json({ success: false });
+    }
+  },  
+  onTopContent: async (req, res) => {
+    const now = new Date();
+    var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+   
+    try {
+      const topLikedContent = await Content.aggregate([
+          {
+            $match: {
+              CreatedAt: {
+                "$gte": firstDay, "$lte": lastDay
+              },
+              ContentType: {
+                $nin: ["ama"]
+              } 
+            },
+          },
+          {
+            $project: {
+              Title: 1,
+              SK: 1,
+              Description: 1,
+              ContentMarkdown: 1,
+              ContentType: 1,
+              Url: 1,
+              Tags: 1,
+              Vertical: 1,
+              SpecialTag: 1,
+              PlaylistTitle: 1,
+              Provider: 1,
+              Img: 1,
+              PlaylistID: 1,
+              Position: 1,
+              ContentStatus: 1,
+              Lists: 1,
+              Live: 1,
+              PublicKey: 1,
+              TotalLikes: { $cond: { if: { $isArray: "$LikedBy" }, then: { $size: "$LikedBy" }, else: 0} }
+            }
+          }
+       ] ).sort({TotalLikes: -1,}).limit(5);
+
+        res.status(200).json({ success: true, data: topLikedContent});
+      } catch (error) {
+      res.status(400).json({ success: false });
+    }
+  },
+  onTopContributor: async (req, res) => {
+    const now = new Date();
+    var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    try {
+        const topContentWithAUthor = await Content.aggregate([
+          {
+            $match: {
+              CreatedAt: {
+                "$gte": firstDay, "$lte": lastDay
+              },
+              ContentType: {
+                $nin: ["ama"]
+              },
+              ContentStatus: {
+                $eq: "active"
+              } 
+            },
+          },
+          {
+             $project: {
+              Title: 1,
+              SK: 1,
+              Description: 1,
+              ContentMarkdown: 1,
+              ContentType: 1,
+              Url: 1,
+              Tags: 1,
+              Vertical: 1,
+              SpecialTag: 1,
+              PlaylistTitle: 1,
+              Provider: 1,
+              Img: 1,
+              PlaylistID: 1,
+              Position: 1,
+              ContentStatus: 1,
+              Lists: 1,
+              Live: 1,
+              User: 1,
+              TotalLikes: { $cond: { if: { $isArray: "$LikedBy" }, then: { $size: "$LikedBy" }, else: 0} },
+              TotalViews: { $cond: { if: { $isArray: "$ViewedBy" }, then: { $size: "$ViewedBy" }, else: 0} }
+             }
+          }
+       ] ).sort({TotalViews: -1, TotalLikes: -1}).limit(3);
+
+       const topAuthor = await User.populate(topContentWithAUthor, {path: "User", select: "Username PublicKey"})
+
+        res.status(200).json({ success: true, data: topContentWithAUthor});
+      } catch (error) {
       res.status(400).json({ success: false });
     }
   },
@@ -115,9 +228,9 @@ export default {
     var contents;
     try {
       if ('url' in req.query) {
-        contents = await Content.findOne({ Url: req.query.url }).populate('PublicKey');
+        contents = await Content.findOne({ Url: req.query.url }).populate('User');
       } else {
-        contents = await Content.find({ ContentStatus: req.params.type }).populate('PublicKey');
+        contents = await Content.find({ ContentStatus: req.params.type }).populate('User');
       }
 
       res.status(200).json(contents);
@@ -152,7 +265,7 @@ export default {
   },
   onGetContentWithSpecialTagHOT: async (req, res) => {
     try {
-      const contents = await Content.find({ SpecialTag: 'Hot' }).populate('PublicKey');
+      const contents = await Content.find({ SpecialTag: 'Hot' }).populate('User');
 
       res.status(200).json(contents);
     } catch (error) {
@@ -166,7 +279,7 @@ export default {
         ContentStatus: {
           $ne: 'submitted',
         },
-      }).populate('PublicKey').sort({
+      }).populate('User').sort({
         CreatedAt: -1,
       });
 
@@ -177,7 +290,7 @@ export default {
   },
   onGetList: async (req, res) => {
     try {
-      const contents = await Content.find({ Lists: req.params.listName }).populate('PublicKey');
+      const contents = await Content.find({ Lists: req.params.listName }).populate('User');
 
       res.status(200).json(contents);
     } catch (error) {
@@ -196,7 +309,7 @@ export default {
           contents = await Content.find({
             ContentType: req.params.type,
             ContentStatus: 'active',
-          }).populate('PublicKey').sort({ Position: -1 });
+          }).populate('User').sort({ Position: -1 });
 
           if ('tags' in req.query && req.query.tags.length > 1) {
             multipleExist = req.query.tags.every((value) => {
@@ -208,7 +321,7 @@ export default {
               ContentType: req.params.type,
               Tags: { $in: req.params.tags },
               ContentStatus: 'active',
-            }).populate('PublicKey').sort({ Position: -1 });
+            }).populate('User').sort({ Position: -1 });
           }
 
           res.status(200).json(contents);
@@ -224,7 +337,7 @@ export default {
             Tags: { $in: req.query.tags },
             ContentStatus: 'active',
             ContentType: req.params.type,
-          }).populate('PublicKey').sort({ Position: -1 });
+          }).populate('User').sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
@@ -237,7 +350,7 @@ export default {
             Tags: { $in: req.query.tags },
             ContentStatus: 'active',
             ContentType: req.params.type,
-          }).populate('PublicKey').sort({ Position: -1 });
+          }).populate('User').sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
@@ -249,7 +362,7 @@ export default {
             SpecialTag: req.query.specialTags,
             ContentStatus: 'active',
             ContentType: req.params.type,
-          }).populate('PublicKey').sort({ Position: -1 });
+          }).populate('User').sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
@@ -258,7 +371,7 @@ export default {
       } // Done till here
     } else if (req.params.videoID === undefined) {
       try {
-        contents = await Content.find({ PlaylistID: req.params.type }).populate('PublicKey');
+        contents = await Content.find({ PlaylistID: req.params.type }).populate('User');
 
         res.status(200).json(contents);
       } catch (error) {
@@ -270,7 +383,7 @@ export default {
           ContentType: req.params.type,
           SK: req.params.videoID,
           ContentStatus: 'active',
-        }).populate('PublicKey').sort({ Position: -1 });
+        }).populate('User').sort({ Position: -1 });
 
         res.status(200).json(contents);
       } catch (error) {
@@ -283,7 +396,7 @@ export default {
       const contents = await Content.find(
         { ContentType: 'newsletters', ContentStatus: 'active' },
         {}
-      ).populate('PublicKey').sort({ Position: -1 });
+      ).populate('User').sort({ Position: -1 });
       //const contents = await Content.find({}, { _id: 0}).sort({ CreatedAt: -1, ContentType: "newsletter"});
       res.status(200).json(contents);
     } catch (error) {
