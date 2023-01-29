@@ -185,7 +185,7 @@ export default {
       const position = await calculatePositionNo(data.ContentType);
       const content = await Content.create({
         PlaylistID: data.ContentType == 'playlist' ? data.PlaylistID : '',
-        User: data.user_id,
+        User: data.UserID,
         Title: data.Title,
         Author: data.Author,
         Description: data.Description,
