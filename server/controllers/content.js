@@ -12,28 +12,112 @@ import ContentTypes from '../utils/content-types.js';
 export default {
   onGetContentStatus: async (req, res) => {
     try {
-      const statusactive = await Content.find({ ContentStatus: 'active' }).populate('User').sort(
-        {
-          Position: 1,
-        }
-      );
-      const statusinactive = await Content.find({
+      let { page, id, tableType } = req.query;
+      let statusActiveContentCount = 0;
+      let statusInactiveContentCount = 0;
+      let statusSubmittedContentCount = 0;
+      let statusActiveContent;
+      let statusInactiveContent;
+      let statusSubmittedContent;
+      const skip = (page - 1) * 10;
+      if (tableType === 'Active') {
+        statusActiveContent = await Content.find({
+          ContentStatus: 'active',
+          User: id,
+        })
+          .sort({
+            CreatedAt: -1,
+          })
+          .skip(skip)
+          .limit(10);
+      } else if (tableType === 'Rejected') {
+        statusInactiveContent = await Content.find({
+          ContentStatus: 'inactive',
+          User: id,
+        })
+          .sort({
+            CreatedAt: -1,
+          })
+          .skip(skip)
+          .limit(10);
+      } else if (tableType === 'Submitted') {
+        statusSubmittedContent = await Content.find({
+          ContentStatus: 'submitted',
+          User: id,
+        })
+          .sort({
+            CreatedAt: -1,
+          })
+          .skip(skip)
+          .limit(10);
+      } else {
+        statusActiveContent = await Content.find({
+          ContentStatus: 'active',
+          User: id,
+        })
+          .sort({
+            CreatedAt: -1,
+          })
+          .skip(skip)
+          .limit(10);
+        statusInactiveContent = await Content.find({
+          ContentStatus: 'inactive',
+          User: id,
+        })
+          .sort({
+            CreatedAt: -1,
+          })
+          .skip(skip)
+          .limit(10);
+
+        statusSubmittedContent = await Content.find({
+          ContentStatus: 'submitted',
+          User: id,
+        })
+          .sort({
+            CreatedAt: -1,
+          })
+          .skip(skip)
+          .limit(10);
+      }
+
+      statusActiveContentCount = await Content.countDocuments({
+        ContentStatus: 'active',
+        User: id,
+      }).exec();
+
+      statusInactiveContentCount = await Content.countDocuments({
         ContentStatus: 'inactive',
-      }).populate('User').sort({
-        Position: 1,
+        User: id,
+      }).exec();
+
+      statusSubmittedContentCount = await Content.countDocuments({
+        ContentStatus: 'submitted',
+        User: id,
+      }).exec();
+
+      res.status(200).json({
+        success: true,
+        data: {
+          statusActiveContent,
+          statusInactiveContent,
+          statusSubmittedContent,
+          statusActiveContentCount,
+          statusInactiveContentCount,
+          statusSubmittedContentCount,
+        },
       });
-      res
-        .status(200)
-        .json({ success: true, data: { statusactive, statusinactive } });
     } catch (error) {
       res.status(400).json({ success: false });
     }
   },
   onGetContent: async (req, res) => {
     try {
-      const contents = await Content.find({ ContentStatus: 'active' }).populate('User').sort({
-        Position: 1,
-      });
+      const contents = await Content.find({ ContentStatus: 'active' })
+        .populate('User')
+        .sort({
+          Position: 1,
+        });
 
       res.status(200).json({ success: true, data: contents });
     } catch (error) {
@@ -44,19 +128,25 @@ export default {
     try {
       const data = req.body;
       let content;
-      const existing_content = await Content.findOne({ _id: data._id});
-      if(existing_content.LikedBy.includes(data.PublicKey)){
-          content = await Content.findOneAndUpdate({ _id: data._id }, { $pull: { LikedBy: data.PublicKey } }, {
+      const existing_content = await Content.findOne({ _id: data._id });
+      if (existing_content.LikedBy.includes(data.PublicKey)) {
+        content = await Content.findOneAndUpdate(
+          { _id: data._id },
+          { $pull: { LikedBy: data.PublicKey } },
+          {
             returnOriginal: false,
-          });
+          }
+        );
+      } else {
+        content = await Content.findOneAndUpdate(
+          { _id: data._id },
+          { $push: { LikedBy: data.PublicKey } },
+          {
+            returnOriginal: false,
+          }
+        );
       }
-      else{
-          content = await Content.findOneAndUpdate({  _id: data._id }, { $push: { LikedBy: data.PublicKey } }, {
-          returnOriginal: false,
-        });
-
-      }
-      res.status(200).json({ success: true, data: content});
+      res.status(200).json({ success: true, data: content });
     } catch (error) {
       res.status(400).json({ success: false });
     }
@@ -64,59 +154,72 @@ export default {
   onViewContent: async (req, res) => {
     try {
       const data = req.body;
-      const content = await Content.findOneAndUpdate({  _id: data._id }, { $push: { ViewedBy: data.PublicKey } }, {
-        returnOriginal: false,
-      });
+      const content = await Content.findOneAndUpdate(
+        { _id: data._id },
+        { $push: { ViewedBy: data.PublicKey } },
+        {
+          returnOriginal: false,
+        }
+      );
 
-      res.status(200).json({ success: true, data: content});
+      res.status(200).json({ success: true, data: content });
     } catch (error) {
       res.status(400).json({ success: false });
     }
-  },  
+  },
   onTopContent: async (req, res) => {
     const now = new Date();
     var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-   
+
     try {
       const topLikedContent = await Content.aggregate([
-          {
-            $match: {
-              CreatedAt: {
-                "$gte": firstDay, "$lte": lastDay
-              },
-              ContentType: {
-                $nin: ["ama"]
-              } 
+        {
+          $match: {
+            CreatedAt: {
+              $gte: firstDay,
+              $lte: lastDay,
+            },
+            ContentType: {
+              $nin: ['ama'],
             },
           },
-          {
-            $project: {
-              Title: 1,
-              SK: 1,
-              Description: 1,
-              ContentMarkdown: 1,
-              ContentType: 1,
-              Url: 1,
-              Tags: 1,
-              Vertical: 1,
-              SpecialTag: 1,
-              PlaylistTitle: 1,
-              Provider: 1,
-              Img: 1,
-              PlaylistID: 1,
-              Position: 1,
-              ContentStatus: 1,
-              Lists: 1,
-              Live: 1,
-              PublicKey: 1,
-              TotalLikes: { $cond: { if: { $isArray: "$LikedBy" }, then: { $size: "$LikedBy" }, else: 0} }
-            }
-          }
-       ] ).sort({TotalLikes: -1,}).limit(5);
+        },
+        {
+          $project: {
+            Title: 1,
+            SK: 1,
+            Description: 1,
+            ContentMarkdown: 1,
+            ContentType: 1,
+            Url: 1,
+            Tags: 1,
+            Vertical: 1,
+            SpecialTag: 1,
+            PlaylistTitle: 1,
+            Provider: 1,
+            Img: 1,
+            PlaylistID: 1,
+            Position: 1,
+            ContentStatus: 1,
+            Lists: 1,
+            Live: 1,
+            PublicKey: 1,
+            TotalLikes: {
+              $cond: {
+                if: { $isArray: '$LikedBy' },
+                then: { $size: '$LikedBy' },
+                else: 0,
+              },
+            },
+          },
+        },
+      ])
+        .sort({ TotalLikes: -1 })
+        .limit(5);
 
-        res.status(200).json({ success: true, data: topLikedContent});
-      } catch (error) {
+      res.status(200).json({ success: true, data: topLikedContent });
+    } catch (error) {
       res.status(400).json({ success: false });
     }
   },
@@ -126,50 +229,68 @@ export default {
     var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
     try {
-        const topContentWithAUthor = await Content.aggregate([
-          {
-            $match: {
-              CreatedAt: {
-                "$gte": firstDay, "$lte": lastDay
-              },
-              ContentType: {
-                $nin: ["ama"]
-              },
-              ContentStatus: {
-                $eq: "active"
-              } 
+      const topContentWithAUthor = await Content.aggregate([
+        {
+          $match: {
+            CreatedAt: {
+              $gte: firstDay,
+              $lte: lastDay,
+            },
+            ContentType: {
+              $nin: ['ama'],
+            },
+            ContentStatus: {
+              $eq: 'active',
             },
           },
-          {
-             $project: {
-              Title: 1,
-              SK: 1,
-              Description: 1,
-              ContentMarkdown: 1,
-              ContentType: 1,
-              Url: 1,
-              Tags: 1,
-              Vertical: 1,
-              SpecialTag: 1,
-              PlaylistTitle: 1,
-              Provider: 1,
-              Img: 1,
-              PlaylistID: 1,
-              Position: 1,
-              ContentStatus: 1,
-              Lists: 1,
-              Live: 1,
-              User: 1,
-              TotalLikes: { $cond: { if: { $isArray: "$LikedBy" }, then: { $size: "$LikedBy" }, else: 0} },
-              TotalViews: { $cond: { if: { $isArray: "$ViewedBy" }, then: { $size: "$ViewedBy" }, else: 0} }
-             }
-          }
-       ] ).sort({TotalViews: -1, TotalLikes: -1}).limit(3);
+        },
+        {
+          $project: {
+            Title: 1,
+            SK: 1,
+            Description: 1,
+            ContentMarkdown: 1,
+            ContentType: 1,
+            Url: 1,
+            Tags: 1,
+            Vertical: 1,
+            SpecialTag: 1,
+            PlaylistTitle: 1,
+            Provider: 1,
+            Img: 1,
+            PlaylistID: 1,
+            Position: 1,
+            ContentStatus: 1,
+            Lists: 1,
+            Live: 1,
+            User: 1,
+            TotalLikes: {
+              $cond: {
+                if: { $isArray: '$LikedBy' },
+                then: { $size: '$LikedBy' },
+                else: 0,
+              },
+            },
+            TotalViews: {
+              $cond: {
+                if: { $isArray: '$ViewedBy' },
+                then: { $size: '$ViewedBy' },
+                else: 0,
+              },
+            },
+          },
+        },
+      ])
+        .sort({ TotalViews: -1, TotalLikes: -1 })
+        .limit(3);
 
-       const topAuthor = await User.populate(topContentWithAUthor, {path: "User", select: "Username PublicKey"})
+      const topAuthor = await User.populate(topContentWithAUthor, {
+        path: 'User',
+        select: 'Username PublicKey',
+      });
 
-        res.status(200).json({ success: true, data: topContentWithAUthor});
-      } catch (error) {
+      res.status(200).json({ success: true, data: topContentWithAUthor });
+    } catch (error) {
       res.status(400).json({ success: false });
     }
   },
@@ -210,7 +331,7 @@ export default {
   },
   onUpdateContent: async (req, res) => {
     try {
-      const data = req.body[0];
+      const data = req.body;
       await Content.updateMany(
         { ContentType: data.ContentType },
         { $set: { SpecialTag: '0' } }
@@ -229,9 +350,13 @@ export default {
     var contents;
     try {
       if ('url' in req.query) {
-        contents = await Content.findOne({ Url: req.query.url }).populate('User');
+        contents = await Content.findOne({ Url: req.query.url }).populate(
+          'User'
+        );
       } else {
-        contents = await Content.find({ ContentStatus: req.params.type }).populate('User');
+        contents = await Content.find({
+          ContentStatus: req.params.type,
+        }).populate('User');
       }
 
       res.status(200).json(contents);
@@ -266,7 +391,9 @@ export default {
   },
   onGetContentWithSpecialTagHOT: async (req, res) => {
     try {
-      const contents = await Content.find({ SpecialTag: 'Hot' }).populate('User');
+      const contents = await Content.find({ SpecialTag: 'Hot' }).populate(
+        'User'
+      );
 
       res.status(200).json(contents);
     } catch (error) {
@@ -280,9 +407,11 @@ export default {
         ContentStatus: {
           $ne: 'submitted',
         },
-      }).populate('User').sort({
-        CreatedAt: -1,
-      });
+      })
+        .populate('User')
+        .sort({
+          CreatedAt: -1,
+        });
 
       res.status(200).json(contents);
     } catch (error) {
@@ -291,7 +420,9 @@ export default {
   },
   onGetList: async (req, res) => {
     try {
-      const contents = await Content.find({ Lists: req.params.listName }).populate('User');
+      const contents = await Content.find({
+        Lists: req.params.listName,
+      }).populate('User');
 
       res.status(200).json(contents);
     } catch (error) {
@@ -310,7 +441,9 @@ export default {
           contents = await Content.find({
             ContentType: req.params.type,
             ContentStatus: 'active',
-          }).populate('User').sort({ Position: -1 });
+          })
+            .populate('User')
+            .sort({ Position: -1 });
 
           if ('tags' in req.query && req.query.tags.length > 1) {
             multipleExist = req.query.tags.every((value) => {
@@ -322,7 +455,9 @@ export default {
               ContentType: req.params.type,
               Tags: { $in: req.params.tags },
               ContentStatus: 'active',
-            }).populate('User').sort({ Position: -1 });
+            })
+              .populate('User')
+              .sort({ Position: -1 });
           }
 
           res.status(200).json(contents);
@@ -338,7 +473,9 @@ export default {
             Tags: { $in: req.query.tags },
             ContentStatus: 'active',
             ContentType: req.params.type,
-          }).populate('User').sort({ Position: -1 });
+          })
+            .populate('User')
+            .sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
@@ -351,7 +488,9 @@ export default {
             Tags: { $in: req.query.tags },
             ContentStatus: 'active',
             ContentType: req.params.type,
-          }).populate('User').sort({ Position: -1 });
+          })
+            .populate('User')
+            .sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
@@ -363,7 +502,9 @@ export default {
             SpecialTag: req.query.specialTags,
             ContentStatus: 'active',
             ContentType: req.params.type,
-          }).populate('User').sort({ Position: -1 });
+          })
+            .populate('User')
+            .sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
@@ -372,7 +513,9 @@ export default {
       } // Done till here
     } else if (req.params.videoID === undefined) {
       try {
-        contents = await Content.find({ PlaylistID: req.params.type }).populate('User');
+        contents = await Content.find({ PlaylistID: req.params.type }).populate(
+          'User'
+        );
 
         res.status(200).json(contents);
       } catch (error) {
@@ -384,7 +527,9 @@ export default {
           ContentType: req.params.type,
           SK: req.params.videoID,
           ContentStatus: 'active',
-        }).populate('User').sort({ Position: -1 });
+        })
+          .populate('User')
+          .sort({ Position: -1 });
 
         res.status(200).json(contents);
       } catch (error) {
@@ -397,7 +542,9 @@ export default {
       const contents = await Content.find(
         { ContentType: 'newsletters', ContentStatus: 'active' },
         {}
-      ).populate('User').sort({ Position: -1 });
+      )
+        .populate('User')
+        .sort({ Position: -1 });
       //const contents = await Content.find({}, { _id: 0}).sort({ CreatedAt: -1, ContentType: "newsletter"});
       res.status(200).json(contents);
     } catch (error) {
