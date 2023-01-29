@@ -234,7 +234,10 @@ export default {
             },
             ContentType: {
               $in: ["articles", "tutorials"]
-            } 
+            },
+            ContentStatus: {
+              $eq: "active"
+            }
           }
         }, 
         {
