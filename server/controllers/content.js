@@ -77,45 +77,51 @@ export default {
     const now = new Date();
     var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-   
+
     try {
-      const topLikedContent = await Content.aggregate([
+        const topContentWithAUthor = await Content.aggregate([
           {
             $match: {
               CreatedAt: {
                 "$gte": firstDay, "$lte": lastDay
               },
               ContentType: {
-                $nin: ["ama"]
+                $in: ["articles", "tutorials"]
+              },
+              ContentStatus: {
+                $eq: "active"
               } 
             },
           },
           {
             $project: {
-              Title: 1,
-              SK: 1,
-              Description: 1,
-              ContentMarkdown: 1,
-              ContentType: 1,
-              Url: 1,
-              Tags: 1,
-              Vertical: 1,
-              SpecialTag: 1,
-              PlaylistTitle: 1,
-              Provider: 1,
-              Img: 1,
-              PlaylistID: 1,
-              Position: 1,
-              ContentStatus: 1,
-              Lists: 1,
-              Live: 1,
-              PublicKey: 1,
-              TotalLikes: { $cond: { if: { $isArray: "$LikedBy" }, then: { $size: "$LikedBy" }, else: 0} }
+            Title: 1,
+            SK: 1,
+            Description: 1,
+            ContentMarkdown: 1,
+            ContentType: 1,
+            Url: 1,
+            Tags: 1,
+            Vertical: 1,
+            SpecialTag: 1,
+            PlaylistTitle: 1,
+            Provider: 1,
+            Img: 1,
+            PlaylistID: 1,
+            Position: 1,
+            ContentStatus: 1,
+            Lists: 1,
+            Live: 1,
+            User: 1,
+            TotalLikes: { $cond: { if: { $isArray: "$LikedBy" }, then: { $size: "$LikedBy" }, else: 0} },
+            TotalViews: { $cond: { if: { $isArray: "$ViewedBy" }, then: { $size: "$ViewedBy" }, else: 0} }
             }
           }
-       ] ).sort({TotalLikes: -1,}).limit(5);
+       ] ).sort({TotalViews: -1, TotalLikes: -1}).limit(5);
 
-        res.status(200).json({ success: true, data: topLikedContent});
+       const topAuthor = await User.populate(topContentWithAUthor, {path: "User", select: "Username PublicKey"})
+
+        res.status(200).json({ success: true, data: topContentWithAUthor});
       } catch (error) {
       res.status(400).json({ success: false });
     }
@@ -126,51 +132,38 @@ export default {
     var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
     try {
-        const topContentWithAUthor = await Content.aggregate([
-          {
-            $match: {
-              CreatedAt: {
-                "$gte": firstDay, "$lte": lastDay
-              },
-              ContentType: {
-                $nin: ["ama"]
-              },
-              ContentStatus: {
-                $eq: "active"
-              } 
+
+      const topContentWithUser = await Content.aggregate([
+        {
+          $match: {
+            CreatedAt: {
+              "$gte": firstDay, "$lte": lastDay
             },
-          },
-          {
-             $project: {
-              Title: 1,
-              SK: 1,
-              Description: 1,
-              ContentMarkdown: 1,
-              ContentType: 1,
-              Url: 1,
-              Tags: 1,
-              Vertical: 1,
-              SpecialTag: 1,
-              PlaylistTitle: 1,
-              Provider: 1,
-              Img: 1,
-              PlaylistID: 1,
-              Position: 1,
-              ContentStatus: 1,
-              Lists: 1,
-              Live: 1,
-              User: 1,
-              TotalLikes: { $cond: { if: { $isArray: "$LikedBy" }, then: { $size: "$LikedBy" }, else: 0} },
-              TotalViews: { $cond: { if: { $isArray: "$ViewedBy" }, then: { $size: "$ViewedBy" }, else: 0} }
-             }
+            ContentType: {
+              $in: ["articles", "tutorials"]
+            } 
           }
-       ] ).sort({TotalViews: -1, TotalLikes: -1}).limit(3);
+        }, 
+        {
+          $group: {
+            _id: "$User",
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {  
+            _id: 0,
+            User: "$_id",
+            count: 1,
+          }
+        }
+      ]).sort({count: -1}).limit(3);
 
-       const topAuthor = await User.populate(topContentWithAUthor, {path: "User", select: "Username PublicKey"})
+      const topAuthor = await User.populate(topContentWithUser, {path: "User", select: "Username PublicKey Country ProfilePicture Skills Author"})
 
-        res.status(200).json({ success: true, data: topContentWithAUthor});
+      res.status(200).json({ success: true, data: topContentWithUser});
       } catch (error) {
-      res.status(400).json({ success: false });
+        res.status(400).json({ success: false });
     }
   },
   onCreateContent: async (req, res) => {
