@@ -1,15 +1,15 @@
-import mongoose from "mongoose";
-import nodemailer from "nodemailer";
-import moment from "moment";
+import mongoose from 'mongoose';
+import nodemailer from 'nodemailer';
+import moment from 'moment';
 // models
-import User from "../models/User.js";
-import { Member } from "../constant/enums.js";
-import jwt from "jsonwebtoken";
-const KEY = "ghjsgdagfzdugfdhfljdshfidsufsd";
-mongoose.set("useFindAndModify", false);
+import User from '../models/User.js';
+import { Member } from '../constant/enums.js';
+import jwt from 'jsonwebtoken';
+const KEY = 'ghjsgdagfzdugfdhfljdshfidsufsd';
+mongoose.set('useFindAndModify', false);
 
 // third part
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs';
 
 export default {
   onFindOneAndUpdateUser: async (req, res) => {
@@ -27,11 +27,11 @@ export default {
 
       const user = await User.findOneAndUpdate(
         { Username: data.Username, Password: data.Password },
-        { Token: "Token " + token, TokenUpdatedAt: new Date() },
+        { Token: 'Token ' + token, TokenUpdatedAt: new Date() },
         { new: true }
       );
 
-      res.status(201).json({ Token: user["Token"] });
+      res.status(201).json({ Token: user['Token'] });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
@@ -49,24 +49,24 @@ export default {
           return res.status(200).json({
             success: true,
             isExists: true,
-            message: "Email already taken",
+            message: 'Email already taken',
           });
         } else {
           return res.status(200).json({
             success: true,
             isExists: false,
-            message: "Email is available",
+            message: 'Email is available',
           });
         }
       } catch (error) {
         res
           .status(400)
-          .json({ success: false, message: "something went wrong." });
+          .json({ success: false, message: 'something went wrong.' });
       }
     } else {
       return res.status(400).json({
         success: false,
-        message: "Email is required",
+        message: 'Email is required',
       });
     }
   },
@@ -94,119 +94,116 @@ export default {
               },
               KEY,
               {
-                expiresIn: "1h",
+                expiresIn: '1h',
               }
             );
 
             return res.status(200).json({
               success: true,
-              message: "successful",
+              message: 'successful',
               data: user,
               token: token,
             });
           } else {
             return res
               .status(400)
-              .json({ success: false, message: "Password is incorrect" });
+              .json({ success: false, message: 'Password is incorrect' });
           }
         } else {
           return res
             .status(404)
-            .json({ success: false, message: "User not found" });
+            .json({ success: false, message: 'User not found' });
         }
       } catch (error) {
         res
           .status(400)
-          .json({ success: false, message: "something went wrong." });
+          .json({ success: false, message: 'something went wrong.' });
       }
     } else {
       return res.status(400).json({
         success: false,
-        message: "Email and Password is required",
+        message: 'Email and Password is required',
       });
     }
   },
-    onRegister: async (req, res) => {
-        // extracting data from body
-        const { PublicKey } = req.body;
+  onRegister: async (req, res) => {
+    // extracting data from body
+    const { PublicKey } = req.body;
 
-        try {
-            // Email
-            let user = await User.findOne({ PublicKey: PublicKey });
-            // if exists
-            if (user) {
-                // return the user 
+    try {
+      // Email
+      let user = await User.findOne({ PublicKey: PublicKey });
+      // if exists
+      if (user) {
+        // return the user
 
-                const token = jwt.sign(
-                    {
-                        userId: user._id,
-                        publicKey: user.PublicKey,
-                    },
-                    KEY,
-                    {
-                        expiresIn: "12h",
-                    }
-                );
-                res.status(200).json({
-                    success: true,
-                    data: user,
-                    token: token,
-                    isNewUser: false,
-                    message: "Successful",
-                });
+        const token = jwt.sign(
+          {
+            userId: user._id,
+            publicKey: user.PublicKey,
+          },
+          KEY,
+          {
+            expiresIn: '12h',
+          }
+        );
+        res.status(200).json({
+          success: true,
+          data: user,
+          token: token,
+          isNewUser: false,
+          message: 'Successful',
+        });
+      } else {
+        user = await User.create({
+          Username: '',
+          Email: '',
+          ProfilePicture: '',
+          Token: '',
+          TokenFirstCreatedAt: '',
+          PublicKey: PublicKey,
+          Role: 'User',
+          TokenUpdatedAt: '',
+          CreatedAt: new Date(),
+          Bio: '',
+          Country: '',
+          Skils: [],
+          Author: {
+            SocialLinks: [],
+            Member: Member[0],
+            RecognizationsAndAwards: [],
+            Certification: [],
+            MostPopular: [],
+            Contributions: [],
+          },
+        });
 
-
-            } else {
-                user = await User.create({
-                    Username: "",
-                    Email: "",
-                    ProfilePicture: "",
-                    Token: "",
-                    TokenFirstCreatedAt: "",
-                    PublicKey: PublicKey,
-                    Role: "User",
-                    TokenUpdatedAt: "",
-                    CreatedAt: new Date(),
-                    Bio: "",
-                    Country: "",
-                    Skils: [],
-                    Author: {
-                        SocialLinks: [],
-                        Member: Member[0],
-                        RecognizationsAndAwards: [],
-                        Certification: [],
-                        MostPopular: [],
-                        Contributions: [],
-                    },
-                });
-
-                const token = jwt.sign(
-                    {
-                        userId: user._id,
-                        publicKey: user.PublicKey,
-                    },
-                    KEY,
-                    {
-                        expiresIn: "12h",
-                    }
-                );
-                res.status(201).json({
-                    success: true,
-                    data: user,
-                    token: token,
-                    isNewUser: true,
-                    message: "Successful",
-                });
-            }
-
-        } catch (error) {
-            console.log("error ===>", error);
-            res.status(400).json({
-                success: false,
-                error: "Something went wrong please try again",
-            });
-        }
-    },
+        const token = jwt.sign(
+          {
+            userId: user._id,
+            publicKey: user.PublicKey,
+          },
+          KEY,
+          {
+            expiresIn: '12h',
+          }
+        );
+        res.status(201).json({
+          success: true,
+          data: user,
+          token: token,
+          isNewUser: true,
+          message: 'Successful',
+        });
+      }
+    } catch (error) {
+      console.log('error ===>', error);
+      res.status(400).json({
+        success: false,
+        error: 'Something went wrong please try again',
+      });
+    }
+  },
   onForgetPassword: async (req, res) => {
     const { Email } = req.body;
 
@@ -216,10 +213,10 @@ export default {
 
       if (user) {
         var transporter = nodemailer.createTransport({
-          service: "gmail",
+          service: 'gmail',
           auth: {
-            user: "ketogenic0334@gmail.com",
-            pass: "uaxkvybjunncmgqg",
+            user: 'ketogenic0334@gmail.com',
+            pass: 'uaxkvybjunncmgqg',
           },
         });
         // generate token for
@@ -233,9 +230,9 @@ export default {
         );
 
         var mailOptions = {
-          from: "ketogenic0334@gmail.com",
+          from: 'ketogenic0334@gmail.com',
           to: user.Email,
-          subject: "Sending Email using Node.js",
+          subject: 'Sending Email using Node.js',
           text: `HI Please find this link localhost http://localhost:8000/auth/resetPass?token=${token}
             Note: this email will be expire in 10 minutes `,
         };
@@ -245,10 +242,10 @@ export default {
             console.log(error);
             return res.status(500).json({
               success: true,
-              message: "something went wrong",
+              message: 'something went wrong',
             });
           } else {
-            console.log("Email sent: " + info.response);
+            console.log('Email sent: ' + info.response);
             var oldDateObj = new Date();
             var newDateObj = new Date();
             newDateObj.setTime(oldDateObj.getTime() + 10 * 60 * 1000);
@@ -256,18 +253,18 @@ export default {
               { _id: user._id },
               { ForgetPasswordLinkExpire: newDateObj }
             );
-            console.log("updateUser ===>", updateUser);
+            console.log('updateUser ===>', updateUser);
 
             if (updateUser) {
-              console.log("updateUser ===>", updateUser);
+              console.log('updateUser ===>', updateUser);
               return res.status(200).json({
                 success: true,
-                message: "Email send Successful",
+                message: 'Email send Successful',
               });
             } else {
               return res.status(500).json({
                 success: true,
-                message: "something went wrong",
+                message: 'something went wrong',
               });
             }
           }
@@ -275,13 +272,13 @@ export default {
       } else {
         return res.status(404).json({
           success: false,
-          message: "Email does not exists in our System",
+          message: 'Email does not exists in our System',
         });
       }
     } catch (error) {
       res
         .status(400)
-        .json({ success: false, message: "something went wrong." });
+        .json({ success: false, message: 'something went wrong.' });
     }
   },
   onChangePassword: async (req, res) => {
@@ -303,28 +300,28 @@ export default {
 
         if (true) {
           const hashPassword = await bcrypt.hash(Password, 10);
-          console.log("hashPassword ==>", user);
+          console.log('hashPassword ==>', user);
           await User.updateOne({ _id: user._id }, { Password: hashPassword });
 
           res.status(200).json({
             success: true,
-            message: "Successful",
+            message: 'Successful',
           });
         } else {
           return res.status(500).json({
             success: false,
-            message: "Link expire",
+            message: 'Link expire',
           });
         }
       }
     } catch (error) {
-      console.log("error ==>", JSON.stringify(error));
+      console.log('error ==>', JSON.stringify(error));
       res.status(500).json({
         success: false,
         message:
-          error?.name == "TokenExpiredError"
-            ? "Link expire"
-            : "something went wrong.",
+          error?.name == 'TokenExpiredError'
+            ? 'Link expire'
+            : 'something went wrong.',
       });
     }
   },

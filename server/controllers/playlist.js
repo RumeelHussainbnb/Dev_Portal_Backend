@@ -14,7 +14,7 @@ export default {
   },
   onPostPlaylist: async (req, res) => {
     debugger;
-    const token = req.headers['authorization'];
+    const token = req.headers['PublicKey'];
     const isTokenValid = await validateToken(token);
     if (isTokenValid === true) {
       try {
@@ -32,12 +32,10 @@ export default {
         res.status(400).json({ success: false, error: error });
       }
     } else {
-      res
-        .status(403)
-        .json({
-          success: false,
-          data: 'You do not have permission to add playlist',
-        });
+      res.status(403).json({
+        success: false,
+        data: 'You do not have permission to add playlist',
+      });
     }
   },
 };
