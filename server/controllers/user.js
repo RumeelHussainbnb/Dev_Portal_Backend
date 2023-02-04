@@ -69,7 +69,7 @@ export default {
 
     // security check
     if (userID != req?.userData?.userId) {
-      res.status(400).json({ success: false, message: 'Bad request' });
+      return res.status(400).json({ success: false, message: 'Bad request' });
     }
     // else find the user
     try {
@@ -105,7 +105,7 @@ export default {
         },
       };
       await User.updateOne({ _id: userID }, updatedUser);
-      return res.status(200).json({ success: true, message: 'Successful' });
+      res.status(200).json({ success: true, message: 'Successful' });
     } catch (error) {
       console.log('error ==>', error);
       res.status(404).json({ success: false, message: 'User not found' });
