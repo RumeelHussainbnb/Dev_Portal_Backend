@@ -21,10 +21,11 @@ export default {
 
   onGetUser: async (req, res) => {
     try {
-      console.log(req.params.publicKey);
-      const user = await User.findOne({ PublicKey: req.params.publicKey });
-
-      res.status(200).json(user);
+      if(req.params.publicKey){
+        const user = await User.findOne({ PublicKey: req.params.publicKey }).select("Username Role RecognizationsAndAwards Member SocialLinks Certification MostPopular Contributions Skills Country Bio ProfilePicture");
+        return res.status(200).json(user);
+      }
+      res.status(200).json("PublicKey missing");
     } catch (error) {
       res.status(400).json({ success: false });
     }
