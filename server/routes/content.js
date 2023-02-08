@@ -17,6 +17,8 @@ router
   .get('/status', content.onGetContentStatus)
   .get('/topContent', content.onTopContent)
   .get('/topContributor', content.onTopContributor)
+  .get('/mostRecentUserContent', content.onUserMostRecentContent)
+  .get('/userMostPopular', content.onUserMostPopularContent)
   .get('/:type', content.onGetContentWithType)
   .get('/', content.onGetContent)
   .post('/', content.onCreateContent)

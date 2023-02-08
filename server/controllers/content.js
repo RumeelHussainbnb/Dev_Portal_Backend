@@ -151,6 +151,86 @@ export default {
       res.status(400).json({ success: false });
     }
   },
+  onUserMostPopularContent: async (req, res) => {
+    const now = new Date();
+    var lastTwoMonth = new Date(now.getFullYear(), now.getMonth() - 2, 0);
+
+    try {
+      const user = await User.findOne({PublicKey: req.body.PublicKey}, {_id: 1}, function(err, doc) {
+        Content.aggregate([
+          {
+            $match: {
+              CreatedAt: {
+                $gte: lastTwoMonth,
+              },
+              User: {
+                $eq: doc._id
+              }
+            },
+          },
+          {
+            $project: {
+              Title: 1,
+              SK: 1,
+              Description: 1,
+              ContentMarkdown: 1,
+              ContentType: 1,
+              Url: 1,
+              Tags: 1,
+              Vertical: 1,
+              SpecialTag: 1,
+              PlaylistTitle: 1,
+              Provider: 1,
+              Img: 1,
+              PlaylistID: 1,
+              Position: 1,
+              ContentStatus: 1,
+              Lists: 1,
+              Live: 1,
+              User: 1,
+              TotalLikes: {
+                $cond: {
+                  if: { $isArray: '$LikedBy' },
+                  then: { $size: '$LikedBy' },
+                  else: 0,
+                },
+              },
+              TotalViews: {
+                $cond: {
+                  if: { $isArray: '$ViewedBy' },
+                  then: { $size: '$ViewedBy' },
+                  else: 0,
+                },
+              },
+            },
+          },
+          {
+            $match: {$and: [{TotalLikes: {$gt: 0}}, {TotalLikes: {$gt: 0}}]}
+          }
+        ], function(err, popularContent){
+          res.status(200).json({ success: true, data: popularContent });
+        })
+          .sort({ TotalViews: -1, TotalLikes: -1 }).limit(1)
+      });
+
+    } catch (error) {
+      res.status(400).json({ success: false });
+    }
+  },
+  onUserMostRecentContent: async (req, res) => {
+    const now = new Date();
+    var lastTwoMonth = new Date(now.getFullYear(), now.getMonth() - 2, 0);
+    try {
+      const user = await User.findOne({PublicKey: req.body.PublicKey}, {_id: 1}, function(err, doc) {
+        Content.find({$and: [{User: {$eq: doc._id}}, {CreatedAt: {$gt: lastTwoMonth}}]}, function(err, contents) {
+            res.status(200).json({ success: true, data: contents });
+        }).sort({CreatedAt: -1}).limit(10);
+      });
+
+    } catch (error) {
+      res.status(400).json({ success: false });
+    }
+  },
   onViewContent: async (req, res) => {
     try {
       const data = req.body;
