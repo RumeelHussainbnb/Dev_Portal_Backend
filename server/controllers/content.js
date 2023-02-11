@@ -231,7 +231,7 @@ export default {
   },
   onUserMostRecentContent: async (req, res) => {
     const now = new Date();
-    var lastTwoMonth = new Date(now.getFullYear(), now.getMonth() - 2, 0);
+    var lastTwoMonth = new Date(now.getFullYear(), now.getMonth() - 3, 0);
     try {
       const user = await User.findOne(
         { PublicKey: req.body.PublicKey },
