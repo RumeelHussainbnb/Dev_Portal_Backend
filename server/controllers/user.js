@@ -1,5 +1,6 @@
 // models
 import User from "../models/User.js";
+import Content from "../models/Content.js";
 
 export default {
   onGetAllUser: async (req, res) => {
@@ -9,8 +10,60 @@ export default {
       let filterObject = {
         ...(name !== "" && { Username: { $regex: nameRegex } }),
       };
-      const users = await User.find(filterObject)
+      const users = await User.aggregate([
+        {
+          $match: filterObject,
+        },
+        {
+          $lookup: {
+            from: "contents",
+            localField: "_id",
+            foreignField: "User",
+            as: "Contents",
+          },
+        },
+        { $unwind: { path: "$Contents", preserveNullAndEmptyArrays: true } },
+        {
+          $group: {
+            _id: "$_id",
+            TotalArticles: {
+              $count: {},
+            },
+            Username: { $first: "$Username" },
+            Password: { $first: "$Password" },
+            CreatedAt: { $first: "$CreatedAt" },
+            Token: { $first: "$Token" },
+            PublicKey: { $first: "$PublicKey" },
+            Role: { $first: "$Role" },
+            Country: { $first: "$Country" },
+            Author: { $first: "$Author" },
+            Bio: { $first: "$Bio" },
+            Email: { $first: "$Email" },
+            ProfilePicture: { $first: "$ProfilePicture" },
+            Skils: { $first: "$Skils" },
+            TotalLikes: {
+              $sum: {
+                $cond: {
+                  if: { $isArray: "$Contents.LikedBy" },
+                  then: { $size: "$Contents.LikedBy" },
+                  else: 0,
+                },
+              },
+            },
+            TotalViews: {
+              $sum: {
+                $cond: {
+                  if: { $isArray: "$Contents.ViewedBy" },
+                  then: { $size: "$Contents.ViewedBy" },
+                  else: 0,
+                },
+              },
+            },
+          },
+        },
+      ])
         .limit(10)
+        .sort({ TotalLikes: -1, TotalViews: -1, TotalArticles: -1 })
         .skip((page - 1) * 10);
       const usersCount = await User.countDocuments(filterObject).exec();
       res.status(200).json({ success: true, data: { users, usersCount } });
@@ -18,7 +71,6 @@ export default {
       res.status(400).json({ success: false });
     }
   },
-
   onGetUser: async (req, res) => {
     try {
       if (req.params.publicKey) {
