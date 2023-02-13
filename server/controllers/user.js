@@ -1,16 +1,69 @@
 // models
-import User from '../models/User.js';
+import User from "../models/User.js";
+import Content from "../models/Content.js";
 
 export default {
   onGetAllUser: async (req, res) => {
     try {
       const { page, name } = req.query;
-      const nameRegex = new RegExp(name, 'i'); // i for case insensitive
+      const nameRegex = new RegExp(name, "i"); // i for case insensitive
       let filterObject = {
-        ...(name !== '' && { Username: { $regex: nameRegex } }),
+        ...(name !== "" && { Username: { $regex: nameRegex } }),
       };
-      const users = await User.find(filterObject)
+      const users = await User.aggregate([
+        {
+          $match: filterObject,
+        },
+        {
+          $lookup: {
+            from: "contents",
+            localField: "_id",
+            foreignField: "User",
+            as: "Contents",
+          },
+        },
+        { $unwind: { path: "$Contents", preserveNullAndEmptyArrays: true } },
+        {
+          $group: {
+            _id: "$_id",
+            TotalArticles: {
+              $count: {},
+            },
+            Username: { $first: "$Username" },
+            Password: { $first: "$Password" },
+            CreatedAt: { $first: "$CreatedAt" },
+            Token: { $first: "$Token" },
+            PublicKey: { $first: "$PublicKey" },
+            Role: { $first: "$Role" },
+            Country: { $first: "$Country" },
+            Author: { $first: "$Author" },
+            Bio: { $first: "$Bio" },
+            Email: { $first: "$Email" },
+            ProfilePicture: { $first: "$ProfilePicture" },
+            Skils: { $first: "$Skils" },
+            TotalLikes: {
+              $sum: {
+                $cond: {
+                  if: { $isArray: "$Contents.LikedBy" },
+                  then: { $size: "$Contents.LikedBy" },
+                  else: 0,
+                },
+              },
+            },
+            TotalViews: {
+              $sum: {
+                $cond: {
+                  if: { $isArray: "$Contents.ViewedBy" },
+                  then: { $size: "$Contents.ViewedBy" },
+                  else: 0,
+                },
+              },
+            },
+          },
+        },
+      ])
         .limit(10)
+        .sort({ TotalLikes: -1, TotalViews: -1, TotalArticles: -1 })
         .skip((page - 1) * 10);
       const usersCount = await User.countDocuments(filterObject).exec();
       res.status(200).json({ success: true, data: { users, usersCount } });
@@ -18,11 +71,14 @@ export default {
       res.status(400).json({ success: false });
     }
   },
-
   onGetUser: async (req, res) => {
     try {
-      if(req.params.publicKey){
-        const user = await User.findOne({ PublicKey: req.params.publicKey }).select("Username Role RecognizationsAndAwards Member SocialLinks Certification MostPopular Contributions Skills Country Bio ProfilePicture");
+      if (req.params.publicKey) {
+        const user = await User.findOne({
+          PublicKey: req.params.publicKey,
+        }).select(
+          "Username Role RecognizationsAndAwards Member SocialLinks Certification MostPopular Contributions Skills Country Bio ProfilePicture"
+        );
         return res.status(200).json(user);
       }
       res.status(200).json("PublicKey missing");
@@ -34,7 +90,7 @@ export default {
     const { userID } = req.params;
     // security check
     if (userID != req?.userData?.userId) {
-      res.status(400).json({ success: false, message: 'Bad request' });
+      res.status(400).json({ success: false, message: "Bad request" });
     }
 
     try {
@@ -47,21 +103,21 @@ export default {
           Author: {
             ...updatedUser.Author,
             Rank: 808,
-            Read: '12.2K',
-            Reputation: '13K',
-            Like: '5',
+            Read: "12.2K",
+            Reputation: "13K",
+            Like: "5",
           },
         };
         return res
           .status(200)
-          .json({ success: true, data: updatedUser, message: 'Successful' });
+          .json({ success: true, data: updatedUser, message: "Successful" });
       } else {
         return res
           .status(404)
-          .json({ success: false, data: {}, message: 'User not found' });
+          .json({ success: false, data: {}, message: "User not found" });
       }
     } catch (error) {
-      res.status(404).json({ success: false, message: 'User not found' });
+      res.status(404).json({ success: false, message: "User not found" });
     }
   },
 
@@ -70,7 +126,7 @@ export default {
 
     // security check
     if (userID != req?.userData?.userId) {
-      return res.status(400).json({ success: false, message: 'Bad request' });
+      return res.status(400).json({ success: false, message: "Bad request" });
     }
     // else find the user
     try {
@@ -106,37 +162,37 @@ export default {
         },
       };
       await User.updateOne({ _id: userID }, updatedUser);
-      res.status(200).json({ success: true, message: 'Successful' });
+      res.status(200).json({ success: true, message: "Successful" });
     } catch (error) {
-      console.log('error ==>', error);
-      res.status(404).json({ success: false, message: 'User not found' });
+      console.log("error ==>", error);
+      res.status(404).json({ success: false, message: "User not found" });
     }
   },
   onAddUserProfil: async (req, res) => {
     const { userID } = req.params;
     // security check
     if (userID != req?.userData?.userId) {
-      res.status(400).json({ success: false, message: 'Bad request' });
+      res.status(400).json({ success: false, message: "Bad request" });
     }
 
     try {
-      console.log('req.file ==<', req.file);
+      console.log("req.file ==<", req.file);
       let imageURL =
         req.protocol +
-        '://' +
+        "://" +
         req.headers.host +
-        '/server/public/images/' +
+        "/server/public/images/" +
         req.file.filename;
       await User.updateOne(
         { _id: req?.userData?.userId },
         { ProfilePicture: imageURL }
       );
 
-      return res.status(200).json({ success: true, message: 'Successful' });
+      return res.status(200).json({ success: true, message: "Successful" });
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'Something went wrong.' });
+        .json({ success: false, message: "Something went wrong." });
     }
   },
   onGetUserById: async (req, res) => {
