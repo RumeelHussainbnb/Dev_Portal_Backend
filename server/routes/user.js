@@ -11,6 +11,7 @@ router.get("/id/:Id?", user.onGetUserById);
 // applying token middleware
 router.use(handleTokenValidation);
 router.get("/getUserProfile/:userID", user.onGetUserProfile);
+router.get("/onGetUserProfileWithData/:userID", user.onGetUserProfileWithData);
 router.put("/updateUserProfile/:userID", user.onUpdateUserProfile);
 router.post(
   "/addUserProfile/:userID",
