@@ -1,13 +1,13 @@
 // models
-import Content from "../models/Content.js";
-import User from "../models/User.js";
-import random_sk from "../utils/generate-random-sk.js";
-import calculatePositionNo from "../utils/calculate-position-no.js";
-import ContentType from "../models/ContentTypes.js";
-import tags from "../utils/tags.js";
-import SelectedTags from "../utils/selected-tags.js";
-import validateKey from "../utils/validate-key.js";
-import ContentTypes from "../utils/content-types.js";
+import Content from '../models/Content.js';
+import User from '../models/User.js';
+import random_sk from '../utils/generate-random-sk.js';
+import calculatePositionNo from '../utils/calculate-position-no.js';
+import ContentType from '../models/ContentTypes.js';
+import tags from '../utils/tags.js';
+import SelectedTags from '../utils/selected-tags.js';
+import validateKey from '../utils/validate-key.js';
+import ContentTypes from '../utils/content-types.js';
 
 export default {
   onGetContentStatus: async (req, res) => {
@@ -20,9 +20,9 @@ export default {
       let statusInactiveContent;
       let statusSubmittedContent;
       const skip = (page - 1) * 10;
-      if (tableType === "Active") {
+      if (tableType === 'Active') {
         statusActiveContent = await Content.find({
-          ContentStatus: "active",
+          ContentStatus: 'active',
           User: id,
         })
           .sort({
@@ -30,9 +30,9 @@ export default {
           })
           .skip(skip)
           .limit(10);
-      } else if (tableType === "Rejected") {
+      } else if (tableType === 'Rejected') {
         statusInactiveContent = await Content.find({
-          ContentStatus: "inactive",
+          ContentStatus: 'inactive',
           User: id,
         })
           .sort({
@@ -40,9 +40,9 @@ export default {
           })
           .skip(skip)
           .limit(10);
-      } else if (tableType === "Submitted") {
+      } else if (tableType === 'Submitted') {
         statusSubmittedContent = await Content.find({
-          ContentStatus: "submitted",
+          ContentStatus: 'submitted',
           User: id,
         })
           .sort({
@@ -52,7 +52,7 @@ export default {
           .limit(10);
       } else {
         statusActiveContent = await Content.find({
-          ContentStatus: "active",
+          ContentStatus: 'active',
           User: id,
         })
           .sort({
@@ -61,7 +61,7 @@ export default {
           .skip(skip)
           .limit(10);
         statusInactiveContent = await Content.find({
-          ContentStatus: "inactive",
+          ContentStatus: 'inactive',
           User: id,
         })
           .sort({
@@ -71,7 +71,7 @@ export default {
           .limit(10);
 
         statusSubmittedContent = await Content.find({
-          ContentStatus: "submitted",
+          ContentStatus: 'submitted',
           User: id,
         })
           .sort({
@@ -82,17 +82,17 @@ export default {
       }
 
       statusActiveContentCount = await Content.countDocuments({
-        ContentStatus: "active",
+        ContentStatus: 'active',
         User: id,
       }).exec();
 
       statusInactiveContentCount = await Content.countDocuments({
-        ContentStatus: "inactive",
+        ContentStatus: 'inactive',
         User: id,
       }).exec();
 
       statusSubmittedContentCount = await Content.countDocuments({
-        ContentStatus: "submitted",
+        ContentStatus: 'submitted',
         User: id,
       }).exec();
 
@@ -113,13 +113,26 @@ export default {
   },
   onGetContent: async (req, res) => {
     try {
-      const contents = await Content.find({ ContentStatus: "active" })
-        .populate("User")
+      const contents = await Content.find({ ContentStatus: 'active' })
+        .populate('User')
         .sort({
           Position: 1,
         });
 
       res.status(200).json({ success: true, data: contents });
+    } catch (error) {
+      res.status(400).json({ success: false });
+    }
+  },
+  onGetContentById: async (req, res) => {
+    try {
+      const content = await Content.findById({ _id: req.query.id })
+        .populate('User')
+        .sort({
+          Position: 1,
+        });
+
+      res.status(200).json({ success: true, data: content });
     } catch (error) {
       res.status(400).json({ success: false });
     }
@@ -194,15 +207,15 @@ export default {
                   User: 1,
                   TotalLikes: {
                     $cond: {
-                      if: { $isArray: "$LikedBy" },
-                      then: { $size: "$LikedBy" },
+                      if: { $isArray: '$LikedBy' },
+                      then: { $size: '$LikedBy' },
                       else: 0,
                     },
                   },
                   TotalViews: {
                     $cond: {
-                      if: { $isArray: "$ViewedBy" },
-                      then: { $size: "$ViewedBy" },
+                      if: { $isArray: '$ViewedBy' },
+                      then: { $size: '$ViewedBy' },
                       else: 0,
                     },
                   },
@@ -276,15 +289,15 @@ export default {
                   _id: 0,
                   TotalLikes: {
                     $cond: {
-                      if: { $isArray: "$LikedBy" },
-                      then: { $size: "$LikedBy" },
+                      if: { $isArray: '$LikedBy' },
+                      then: { $size: '$LikedBy' },
                       else: 0,
                     },
                   },
                   TotalViews: {
                     $cond: {
-                      if: { $isArray: "$ViewedBy" },
-                      then: { $size: "$ViewedBy" },
+                      if: { $isArray: '$ViewedBy' },
+                      then: { $size: '$ViewedBy' },
                       else: 0,
                     },
                   },
@@ -292,12 +305,12 @@ export default {
               },
               {
                 $group: {
-                  _id: "$User",
+                  _id: '$User',
                   AllLikes: {
-                    $sum: "$TotalLikes",
+                    $sum: '$TotalLikes',
                   },
                   AllViews: {
-                    $sum: "$TotalViews",
+                    $sum: '$TotalViews',
                   },
                 },
               },
@@ -342,10 +355,10 @@ export default {
               $lte: lastDay,
             },
             ContentType: {
-              $in: ["articles", "tutorials"],
+              $in: ['articles', 'tutorials'],
             },
             ContentStatus: {
-              $eq: "active",
+              $eq: 'active',
             },
           },
         },
@@ -371,15 +384,15 @@ export default {
             User: 1,
             TotalLikes: {
               $cond: {
-                if: { $isArray: "$LikedBy" },
-                then: { $size: "$LikedBy" },
+                if: { $isArray: '$LikedBy' },
+                then: { $size: '$LikedBy' },
                 else: 0,
               },
             },
             TotalViews: {
               $cond: {
-                if: { $isArray: "$ViewedBy" },
-                then: { $size: "$ViewedBy" },
+                if: { $isArray: '$ViewedBy' },
+                then: { $size: '$ViewedBy' },
                 else: 0,
               },
             },
@@ -408,23 +421,23 @@ export default {
               $lte: lastDay,
             },
             ContentType: {
-              $in: ["articles", "tutorials"],
+              $in: ['articles', 'tutorials'],
             },
             ContentStatus: {
-              $eq: "active",
+              $eq: 'active',
             },
           },
         },
         {
           $group: {
-            _id: "$User",
+            _id: '$User',
             count: { $sum: 1 },
           },
         },
         {
           $project: {
             _id: 0,
-            User: "$_id",
+            User: '$_id',
             count: 1,
           },
         },
@@ -433,8 +446,8 @@ export default {
         .limit(3);
 
       const topAuthor = await User.populate(topContentWithUser, {
-        path: "User",
-        select: "Username PublicKey Country ProfilePicture Skills Author",
+        path: 'User',
+        select: 'Username PublicKey Country ProfilePicture Skills Author',
       });
 
       res.status(200).json({ success: true, data: topContentWithUser });
@@ -453,15 +466,15 @@ export default {
       const get_random_sk = await random_sk();
       const position = await calculatePositionNo(data.ContentType);
       const content = await Content.create({
-        PlaylistID: data.ContentType == "playlist" ? data.PlaylistID : "",
+        PlaylistID: data.ContentType == 'playlist' ? data.PlaylistID : '',
         User: data.UserID,
         Title: data.Title,
         Author: data.Author,
         Description: data.Description,
+        ContentMarkdown: data?.ContentMarkdown,
         SK: get_random_sk,
         ContentType: data.ContentType,
         ContentStatus: data.ContentStatus,
-        ContentMarkdown: "",
         Position: position,
         List: data.List,
         Url: data.Url,
@@ -482,9 +495,9 @@ export default {
       const data = req.body;
       await Content.updateMany(
         { ContentType: data.ContentType },
-        { $set: { SpecialTag: "0" } }
+        { $set: { SpecialTag: '0' } }
       );
-      data["SpecialTag"] = data["SpecialTag"] != "" ? "New" : "0";
+      data['SpecialTag'] = data['SpecialTag'] != '' ? 'New' : '0';
       const content = await Content.findOneAndUpdate({ SK: data.SK }, data, {
         returnOriginal: false,
       });
@@ -497,14 +510,14 @@ export default {
   onGetContentWithType: async (req, res) => {
     var contents;
     try {
-      if ("url" in req.query) {
+      if ('url' in req.query) {
         contents = await Content.findOne({ Url: req.query.url }).populate(
-          "User"
+          'User'
         );
       } else {
         contents = await Content.find({
           ContentStatus: req.params.type,
-        }).populate("User");
+        }).populate('User');
       }
 
       res.status(200).json(contents);
@@ -518,7 +531,7 @@ export default {
       var type = [];
 
       contents.forEach(function (contents) {
-        type.push(contents["Name"]);
+        type.push(contents['Name']);
       });
       res.status(200).json(type);
     } catch (error) {
@@ -539,8 +552,8 @@ export default {
   },
   onGetContentWithSpecialTagHOT: async (req, res) => {
     try {
-      const contents = await Content.find({ SpecialTag: "Hot" }).populate(
-        "User"
+      const contents = await Content.find({ SpecialTag: 'Hot' }).populate(
+        'User'
       );
 
       res.status(200).json(contents);
@@ -551,12 +564,12 @@ export default {
   onGetContentWithSpecialTagNEW: async (req, res) => {
     try {
       const contents = await Content.find({
-        SpecialTag: "New",
+        SpecialTag: 'New',
         ContentStatus: {
-          $ne: "submitted",
+          $ne: 'submitted',
         },
       })
-        .populate("User")
+        .populate('User')
         .sort({
           CreatedAt: -1,
         });
@@ -570,7 +583,7 @@ export default {
     try {
       const contents = await Content.find({
         Lists: req.params.listName,
-      }).populate("User");
+      }).populate('User');
 
       res.status(200).json(contents);
     } catch (error) {
@@ -582,29 +595,29 @@ export default {
     if (ContentTypes.includes(req.params.type)) {
       if (
         ContentTypes.includes(req.params.type) &&
-        ((req.query.tags === "" && req.query.specialTags === "") ||
+        ((req.query.tags === '' && req.query.specialTags === '') ||
           Object.keys(req.query).length == 0)
       ) {
         try {
           contents = await Content.find({
             ContentType: req.params.type,
-            ContentStatus: "active",
+            ContentStatus: 'active',
           })
-            .populate("User")
+            .populate('User')
             .sort({ Position: -1 });
 
-          if ("tags" in req.query && req.query.tags.length > 1) {
+          if ('tags' in req.query && req.query.tags.length > 1) {
             multipleExist = req.query.tags.every((value) => {
-              return SelectedTags["allTags"].includes(value);
+              return SelectedTags['allTags'].includes(value);
             });
           }
           if (multipleExist) {
             contents = await Content.find({
               ContentType: req.params.type,
               Tags: { $in: req.params.tags },
-              ContentStatus: "active",
+              ContentStatus: 'active',
             })
-              .populate("User")
+              .populate('User')
               .sort({ Position: -1 });
           }
 
@@ -613,45 +626,45 @@ export default {
           res.status(400).json({ success: false });
         }
       } else if (
-        SelectedTags["allTags"].some((r) => req.query.tags.includes(r)) &&
-        req.query.specialTags === ""
+        SelectedTags['allTags'].some((r) => req.query.tags.includes(r)) &&
+        req.query.specialTags === ''
       ) {
         try {
           contents = await Content.find({
             Tags: { $in: req.query.tags },
-            ContentStatus: "active",
+            ContentStatus: 'active',
             ContentType: req.params.type,
           })
-            .populate("User")
+            .populate('User')
             .sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
           res.status(400).json({ success: false });
         }
-      } else if (req.query.specialTags !== "" && req.query.tags !== "") {
+      } else if (req.query.specialTags !== '' && req.query.tags !== '') {
         try {
           contents = await Content.find({
             SpecialTag: req.query.specialTags,
             Tags: { $in: req.query.tags },
-            ContentStatus: "active",
+            ContentStatus: 'active',
             ContentType: req.params.type,
           })
-            .populate("User")
+            .populate('User')
             .sort({ Position: -1 });
 
           res.status(200).json(contents);
         } catch (error) {
           res.status(400).json({ success: false });
         }
-      } else if (req.query.specialTags !== "" && req.query.tags === "") {
+      } else if (req.query.specialTags !== '' && req.query.tags === '') {
         try {
           contents = await Content.find({
             SpecialTag: req.query.specialTags,
-            ContentStatus: "active",
+            ContentStatus: 'active',
             ContentType: req.params.type,
           })
-            .populate("User")
+            .populate('User')
             .sort({ Position: -1 });
 
           res.status(200).json(contents);
@@ -662,7 +675,7 @@ export default {
     } else if (req.params.videoID === undefined) {
       try {
         contents = await Content.find({ PlaylistID: req.params.type }).populate(
-          "User"
+          'User'
         );
 
         res.status(200).json(contents);
@@ -674,9 +687,9 @@ export default {
         contents = await Content.findOne({
           ContentType: req.params.type,
           SK: req.params.videoID,
-          ContentStatus: "active",
+          ContentStatus: 'active',
         })
-          .populate("User")
+          .populate('User')
           .sort({ Position: -1 });
 
         res.status(200).json(contents);
@@ -688,10 +701,10 @@ export default {
   onGetContentBnbNewsletters: async (req, res) => {
     try {
       const contents = await Content.find(
-        { ContentType: "newsletters", ContentStatus: "active" },
+        { ContentType: 'newsletters', ContentStatus: 'active' },
         {}
       )
-        .populate("User")
+        .populate('User')
         .sort({ Position: -1 });
       //const contents = await Content.find({}, { _id: 0}).sort({ CreatedAt: -1, ContentType: "newsletter"});
       res.status(200).json(contents);
@@ -700,23 +713,23 @@ export default {
     }
   },
   onPostContentBnbNewsletters: async (req, res) => {
-    const key = req.headers["PublicKey"];
+    const key = req.headers['PublicKey'];
     const isAdmin = await validateKey(key);
-    const position = await calculatePositionNo("newsletters");
+    const position = await calculatePositionNo('newsletters');
     if (true) {
       try {
         const data = req.body;
-        console.log("data ===>", data);
+        console.log('data ===>', data);
         //split string into array by space then join array with '-'
-        let titleSpacesRemoved = data.Title.split(" ").join("-");
+        let titleSpacesRemoved = data.Title.split(' ').join('-');
         const content = await Content.create({
           Title: data.Title,
-          Url: process.env.HOME_URL + "/newsletters/" + titleSpacesRemoved,
+          Url: process.env.HOME_URL + '/newsletters/' + titleSpacesRemoved,
           SK: titleSpacesRemoved,
           Author: data.Author,
           Position: position,
-          ContentStatus: "active",
-          ContentType: "newsletters",
+          ContentStatus: 'active',
+          ContentType: 'newsletters',
           ContentMarkdown: data.ContentMarkdown,
           Description: data.Description,
           //                    Img: data.Img
@@ -728,7 +741,7 @@ export default {
     } else {
       res.status(403).json({
         success: false,
-        data: "You do not have permission to add newsletter",
+        data: 'You do not have permission to add newsletter',
       });
     }
   },
