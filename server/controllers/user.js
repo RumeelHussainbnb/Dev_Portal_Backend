@@ -1,6 +1,7 @@
 // models
 import User from "../models/User.js";
 import Content from "../models/Content.js";
+import mongoose from "mongoose";
 
 export default {
   onGetAllUser: async (req, res) => {
@@ -84,6 +85,154 @@ export default {
       res.status(200).json("PublicKey missing");
     } catch (error) {
       res.status(400).json({ success: false });
+    }
+  },
+  onGetUserProfileWithData: async (req, res) => {
+    const { userID } = req.params;
+    const now = new Date();
+    var lastThreeMonths = new Date(now.getFullYear(), now.getMonth() - 3, 0);
+
+    // security check
+
+    // Enable this and tokenValidation
+    // if (userID != req?.userData?.userId) {
+    //   return res.status(400).json({ success: false, message: "Bad request" });
+    // }
+
+    try {
+      const user = await User.findOne({ _id: userID });
+
+      if (user && user._id == userID) {
+        let updatedUser = JSON.parse(JSON.stringify(user));
+        const userWithData = await User.aggregate([
+          {
+            $match: { _id: mongoose.Types.ObjectId(userID) },
+          },
+          {
+            $lookup: {
+              from: "contents",
+              localField: "_id",
+              foreignField: "User",
+              as: "Contents",
+            },
+          },
+          { $unwind: { path: "$Contents", preserveNullAndEmptyArrays: true } },
+          {
+            $group: {
+              _id: "$_id",
+              UserAllContents: { $addToSet: "$Contents" },
+              UserContent: { $addToSet: "$Contents" },
+              Username: { $first: "$Username" },
+              Password: { $first: "$Password" },
+              CreatedAt: { $first: "$CreatedAt" },
+              Token: { $first: "$Token" },
+              PublicKey: { $first: "$PublicKey" },
+              Role: { $first: "$Role" },
+              Country: { $first: "$Country" },
+              Author: { $first: "$Author" },
+              Bio: { $first: "$Bio" },
+              Email: { $first: "$Email" },
+              ProfilePicture: { $first: "$ProfilePicture" },
+              Skils: { $first: "$Skils" },
+              TotalArticles: {
+                $count: {},
+              },
+              TotalLikes: {
+                $sum: {
+                  $cond: {
+                    if: { $isArray: "$Contents.LikedBy" },
+                    then: { $size: "$Contents.LikedBy" },
+                    else: 0,
+                  },
+                },
+              },
+              TotalViews: {
+                $sum: {
+                  $cond: {
+                    if: { $isArray: "$Contents.ViewedBy" },
+                    then: { $size: "$Contents.ViewedBy" },
+                    else: 0,
+                  },
+                },
+              },
+              Recent: {
+                $getField: {
+                  field: "UserContent",
+                  input: {
+                    $first: {
+                      $filter: {
+                        input: "$data",
+                        cond: {
+                          $gte: [
+                            "$$this.UserContent.CreatedAt",
+                            lastThreeMonths,
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              Email: 1,
+              UserContent: 1,
+              Recent: {
+                $getField: {
+                  field: "Title",
+                  input: {
+                    $filter: {
+                      input: "$UserContent",
+                      cond: {
+                        $gte: ["$UserContent.CreatedAt", lastThreeMonths],
+                      },
+                    },
+                  },
+                },
+              },
+              TotalArticles: 1,
+              TotalLikes: 1,
+              TotalViews: 1,
+            },
+          },
+          // {
+          //   $project: {
+          //     Title: 1,
+          //     Recent: {
+          //       $getField: {
+          //         field: "UserContent",
+          //         input: {
+          //           $first: {
+          //             $filter: {
+          //               input: "$data",
+          //               cond: {
+          //                 $gte: [
+          //                   "$$this.UserContent.CreatedAt",
+          //                   lastThreeMonths,
+          //                 ],
+          //               },
+          //             },
+          //           },
+          //         },
+          //       },
+          //     },
+          //   },
+          // },
+        ]);
+
+        return res
+          .status(200)
+          .json({ success: true, data: userWithData, message: "Successful" });
+      } else {
+        return res
+          .status(404)
+          .json({ success: false, data: {}, message: "User not found" });
+      }
+    } catch (error) {
+      res.status(404).json({ success: false, message: "User not found" });
     }
   },
   onGetUserProfile: async (req, res) => {
