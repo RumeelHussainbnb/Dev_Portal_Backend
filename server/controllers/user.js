@@ -94,17 +94,17 @@ export default {
 
     // security check
 
-    // Enable this and tokenValidation
-    // if (userID != req?.userData?.userId) {
-    //   return res.status(400).json({ success: false, message: "Bad request" });
-    // }
+    if (userID != req?.userData?.userId) {
+      return res.status(400).json({ success: false, message: 'Bad request' });
+    }
 
     try {
       const user = await User.findOne({ _id: userID });
 
       if (user && user._id == userID) {
         let updatedUser = JSON.parse(JSON.stringify(user));
-        const userWithData = await User.aggregate([
+
+        const userWithAllContentRelatedData = await User.aggregate([
           {
             $match: { _id: mongoose.Types.ObjectId(userID) },
           },
@@ -120,8 +120,8 @@ export default {
           {
             $group: {
               _id: '$_id',
+              MostPopularContent: { $addToSet: '$Contents' },
               UserAllContents: { $addToSet: '$Contents' },
-              UserContent: { $addToSet: '$Contents' },
               Username: { $first: '$Username' },
               Password: { $first: '$Password' },
               CreatedAt: { $first: '$CreatedAt' },
@@ -135,7 +135,7 @@ export default {
               ProfilePicture: { $first: '$ProfilePicture' },
               Skils: { $first: '$Skils' },
               TotalArticles: {
-                $count: {},
+                $sum: 1,
               },
               TotalLikes: {
                 $sum: {
@@ -155,77 +155,55 @@ export default {
                   },
                 },
               },
-              Recent: {
-                $getField: {
-                  field: 'UserContent',
-                  input: {
-                    $first: {
-                      $filter: {
-                        input: '$data',
-                        cond: {
-                          $gte: [
-                            '$$this.UserContent.CreatedAt',
-                            lastThreeMonths,
-                          ],
-                        },
-                      },
-                    },
-                  },
-                },
-              },
+            },
+          },
+          {
+            $unwind: {
+              path: '$MostPopularContent',
+              preserveNullAndEmptyArrays: true,
             },
           },
           {
             $project: {
-              _id: 0,
-              Email: 1,
-              UserContent: 1,
-              Recent: {
-                $getField: {
-                  field: 'Title',
-                  input: {
-                    $filter: {
-                      input: '$UserContent',
-                      cond: {
-                        $gte: ['$UserContent.CreatedAt', lastThreeMonths],
-                      },
-                    },
+              _id: 1,
+              MostPopularContent: 1,
+              UserAllContents: 1,
+              MostRecentContent: {
+                $filter: {
+                  input: '$UserAllContents',
+                  as: 'item',
+                  cond: {
+                    $gt: ['$$item.CreatedAt', lastThreeMonths],
                   },
                 },
               },
+              Username: 1,
+              Password: 1,
+              CreatedAt: 1,
+              PublicKey: 1,
+              Role: 1,
+              Country: 1,
+              Author: 1,
+              Bio: 1,
+              Email: 1,
+              ProfilePicture: 1,
+              Skils: 1,
               TotalArticles: 1,
               TotalLikes: 1,
               TotalViews: 1,
+              EachContentLike: { $size: '$MostPopularContent.LikedBy' },
+              EachContentView: { $size: '$MostPopularContent.ViewedBy' },
             },
           },
-          // {
-          //   $project: {
-          //     Title: 1,
-          //     Recent: {
-          //       $getField: {
-          //         field: "UserContent",
-          //         input: {
-          //           $first: {
-          //             $filter: {
-          //               input: "$data",
-          //               cond: {
-          //                 $gte: [
-          //                   "$$this.UserContent.CreatedAt",
-          //                   lastThreeMonths,
-          //                 ],
-          //               },
-          //             },
-          //           },
-          //         },
-          //       },
-          //     },
-          //   },
-          // },
+          { $sort: { EachContentLike: -1, EachContentView: -1 } },
+          { $limit: 1 },
         ]);
 
-        return res
-          .status(200)
-          .json({ success: true, data: userWithData, message: 'Successful' });
+        return res.status(200).json({
+          success: true,
+          data: userWithAllContentRelatedData,
+          message: 'Successful',
+        });
       } else {
         return res
           .status(404)
