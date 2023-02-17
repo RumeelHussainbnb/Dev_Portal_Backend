@@ -189,8 +189,20 @@ export default {
               TotalArticles: 1,
               TotalLikes: 1,
               TotalViews: 1,
-              EachContentLike: { $size: '$MostPopularContent.LikedBy' },
-              EachContentView: { $size: '$MostPopularContent.ViewedBy' },
+              EachContentLike: {
+                $cond: {
+                  if: { $isArray: '$MostPopularContent.LikedBy' },
+                  then: { $size: '$MostPopularContent.LikedBy' },
+                  else: 0,
+                },
+              },
+              EachContentView: {
+                $cond: {
+                  if: { $isArray: '$MostPopularContent.ViewedBy' },
+                  then: { $size: '$MostPopularContent.ViewedBy' },
+                  else: 0,
+                },
+              },
             },
           },
           { $sort: { EachContentLike: -1, EachContentView: -1 } },
@@ -199,7 +211,7 @@ export default {
 
         return res.status(200).json({
           success: true,
-          data: userWithAllContentRelatedData,
+          data: userWithAllContentRelatedData[0],
           message: 'Successful',
         });
       } else {
