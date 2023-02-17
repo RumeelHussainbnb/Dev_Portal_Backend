@@ -77,9 +77,7 @@ export default {
       if (req.params.publicKey) {
         const user = await User.findOne({
           PublicKey: req.params.publicKey,
-        }).select(
-          'Username Role RecognizationsAndAwards Member SocialLinks Certification MostPopular Contributions Skills Country Bio ProfilePicture'
-        );
+        });
         return res.status(200).json(user);
       }
       res.status(200).json('PublicKey missing');
@@ -252,9 +250,9 @@ export default {
     const { userID } = req.params;
 
     // security check
-    if (userID != req?.userData?.userId) {
-      return res.status(400).json({ success: false, message: 'Bad request' });
-    }
+    // if (userID != req?.userData?.userId) {
+    //   return res.status(400).json({ success: false, message: 'Bad request' });
+    // }
     // else find the user
     try {
       const tempUser = await User.findOne({ _id: userID });
