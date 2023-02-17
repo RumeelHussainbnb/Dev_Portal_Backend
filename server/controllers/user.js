@@ -1,15 +1,15 @@
 // models
-import User from "../models/User.js";
-import Content from "../models/Content.js";
-import mongoose from "mongoose";
+import User from '../models/User.js';
+import Content from '../models/Content.js';
+import mongoose from 'mongoose';
 
 export default {
   onGetAllUser: async (req, res) => {
     try {
       const { page, name } = req.query;
-      const nameRegex = new RegExp(name, "i"); // i for case insensitive
+      const nameRegex = new RegExp(name, 'i'); // i for case insensitive
       let filterObject = {
-        ...(name !== "" && { Username: { $regex: nameRegex } }),
+        ...(name !== '' && { Username: { $regex: nameRegex } }),
       };
       const users = await User.aggregate([
         {
@@ -17,36 +17,36 @@ export default {
         },
         {
           $lookup: {
-            from: "contents",
-            localField: "_id",
-            foreignField: "User",
-            as: "Contents",
+            from: 'contents',
+            localField: '_id',
+            foreignField: 'User',
+            as: 'Contents',
           },
         },
-        { $unwind: { path: "$Contents", preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: '$Contents', preserveNullAndEmptyArrays: true } },
         {
           $group: {
-            _id: "$_id",
+            _id: '$_id',
             TotalArticles: {
               $count: {},
             },
-            Username: { $first: "$Username" },
-            Password: { $first: "$Password" },
-            CreatedAt: { $first: "$CreatedAt" },
-            Token: { $first: "$Token" },
-            PublicKey: { $first: "$PublicKey" },
-            Role: { $first: "$Role" },
-            Country: { $first: "$Country" },
-            Author: { $first: "$Author" },
-            Bio: { $first: "$Bio" },
-            Email: { $first: "$Email" },
-            ProfilePicture: { $first: "$ProfilePicture" },
-            Skils: { $first: "$Skils" },
+            Username: { $first: '$Username' },
+            Password: { $first: '$Password' },
+            CreatedAt: { $first: '$CreatedAt' },
+            Token: { $first: '$Token' },
+            PublicKey: { $first: '$PublicKey' },
+            Role: { $first: '$Role' },
+            Country: { $first: '$Country' },
+            Author: { $first: '$Author' },
+            Bio: { $first: '$Bio' },
+            Email: { $first: '$Email' },
+            ProfilePicture: { $first: '$ProfilePicture' },
+            Skils: { $first: '$Skils' },
             TotalLikes: {
               $sum: {
                 $cond: {
-                  if: { $isArray: "$Contents.LikedBy" },
-                  then: { $size: "$Contents.LikedBy" },
+                  if: { $isArray: '$Contents.LikedBy' },
+                  then: { $size: '$Contents.LikedBy' },
                   else: 0,
                 },
               },
@@ -54,8 +54,8 @@ export default {
             TotalViews: {
               $sum: {
                 $cond: {
-                  if: { $isArray: "$Contents.ViewedBy" },
-                  then: { $size: "$Contents.ViewedBy" },
+                  if: { $isArray: '$Contents.ViewedBy' },
+                  then: { $size: '$Contents.ViewedBy' },
                   else: 0,
                 },
               },
@@ -78,11 +78,11 @@ export default {
         const user = await User.findOne({
           PublicKey: req.params.publicKey,
         }).select(
-          "Username Role RecognizationsAndAwards Member SocialLinks Certification MostPopular Contributions Skills Country Bio ProfilePicture"
+          'Username Role RecognizationsAndAwards Member SocialLinks Certification MostPopular Contributions Skills Country Bio ProfilePicture'
         );
         return res.status(200).json(user);
       }
-      res.status(200).json("PublicKey missing");
+      res.status(200).json('PublicKey missing');
     } catch (error) {
       res.status(400).json({ success: false });
     }
@@ -110,38 +110,38 @@ export default {
           },
           {
             $lookup: {
-              from: "contents",
-              localField: "_id",
-              foreignField: "User",
-              as: "Contents",
+              from: 'contents',
+              localField: '_id',
+              foreignField: 'User',
+              as: 'Contents',
             },
           },
-          { $unwind: { path: "$Contents", preserveNullAndEmptyArrays: true } },
+          { $unwind: { path: '$Contents', preserveNullAndEmptyArrays: true } },
           {
             $group: {
-              _id: "$_id",
-              UserAllContents: { $addToSet: "$Contents" },
-              UserContent: { $addToSet: "$Contents" },
-              Username: { $first: "$Username" },
-              Password: { $first: "$Password" },
-              CreatedAt: { $first: "$CreatedAt" },
-              Token: { $first: "$Token" },
-              PublicKey: { $first: "$PublicKey" },
-              Role: { $first: "$Role" },
-              Country: { $first: "$Country" },
-              Author: { $first: "$Author" },
-              Bio: { $first: "$Bio" },
-              Email: { $first: "$Email" },
-              ProfilePicture: { $first: "$ProfilePicture" },
-              Skils: { $first: "$Skils" },
+              _id: '$_id',
+              UserAllContents: { $addToSet: '$Contents' },
+              UserContent: { $addToSet: '$Contents' },
+              Username: { $first: '$Username' },
+              Password: { $first: '$Password' },
+              CreatedAt: { $first: '$CreatedAt' },
+              Token: { $first: '$Token' },
+              PublicKey: { $first: '$PublicKey' },
+              Role: { $first: '$Role' },
+              Country: { $first: '$Country' },
+              Author: { $first: '$Author' },
+              Bio: { $first: '$Bio' },
+              Email: { $first: '$Email' },
+              ProfilePicture: { $first: '$ProfilePicture' },
+              Skils: { $first: '$Skils' },
               TotalArticles: {
                 $count: {},
               },
               TotalLikes: {
                 $sum: {
                   $cond: {
-                    if: { $isArray: "$Contents.LikedBy" },
-                    then: { $size: "$Contents.LikedBy" },
+                    if: { $isArray: '$Contents.LikedBy' },
+                    then: { $size: '$Contents.LikedBy' },
                     else: 0,
                   },
                 },
@@ -149,22 +149,22 @@ export default {
               TotalViews: {
                 $sum: {
                   $cond: {
-                    if: { $isArray: "$Contents.ViewedBy" },
-                    then: { $size: "$Contents.ViewedBy" },
+                    if: { $isArray: '$Contents.ViewedBy' },
+                    then: { $size: '$Contents.ViewedBy' },
                     else: 0,
                   },
                 },
               },
               Recent: {
                 $getField: {
-                  field: "UserContent",
+                  field: 'UserContent',
                   input: {
                     $first: {
                       $filter: {
-                        input: "$data",
+                        input: '$data',
                         cond: {
                           $gte: [
-                            "$$this.UserContent.CreatedAt",
+                            '$$this.UserContent.CreatedAt',
                             lastThreeMonths,
                           ],
                         },
@@ -182,12 +182,12 @@ export default {
               UserContent: 1,
               Recent: {
                 $getField: {
-                  field: "Title",
+                  field: 'Title',
                   input: {
                     $filter: {
-                      input: "$UserContent",
+                      input: '$UserContent',
                       cond: {
-                        $gte: ["$UserContent.CreatedAt", lastThreeMonths],
+                        $gte: ['$UserContent.CreatedAt', lastThreeMonths],
                       },
                     },
                   },
@@ -225,21 +225,21 @@ export default {
 
         return res
           .status(200)
-          .json({ success: true, data: userWithData, message: "Successful" });
+          .json({ success: true, data: userWithData, message: 'Successful' });
       } else {
         return res
           .status(404)
-          .json({ success: false, data: {}, message: "User not found" });
+          .json({ success: false, data: {}, message: 'User not found' });
       }
     } catch (error) {
-      res.status(404).json({ success: false, message: "User not found" });
+      res.status(404).json({ success: false, message: 'User not found' });
     }
   },
   onGetUserProfile: async (req, res) => {
     const { userID } = req.params;
     // security check
     if (userID != req?.userData?.userId) {
-      res.status(400).json({ success: false, message: "Bad request" });
+      return res.status(400).json({ success: false, message: 'Bad request' });
     }
 
     try {
@@ -252,21 +252,21 @@ export default {
           Author: {
             ...updatedUser.Author,
             Rank: 808,
-            Read: "12.2K",
-            Reputation: "13K",
-            Like: "5",
+            Read: '12.2K',
+            Reputation: '13K',
+            Like: '5',
           },
         };
         return res
           .status(200)
-          .json({ success: true, data: updatedUser, message: "Successful" });
+          .json({ success: true, data: updatedUser, message: 'Successful' });
       } else {
         return res
           .status(404)
-          .json({ success: false, data: {}, message: "User not found" });
+          .json({ success: false, data: {}, message: 'User not found' });
       }
     } catch (error) {
-      res.status(404).json({ success: false, message: "User not found" });
+      res.status(404).json({ success: false, message: 'User not found' });
     }
   },
 
@@ -275,7 +275,7 @@ export default {
 
     // security check
     if (userID != req?.userData?.userId) {
-      return res.status(400).json({ success: false, message: "Bad request" });
+      return res.status(400).json({ success: false, message: 'Bad request' });
     }
     // else find the user
     try {
@@ -311,37 +311,37 @@ export default {
         },
       };
       await User.updateOne({ _id: userID }, updatedUser);
-      res.status(200).json({ success: true, message: "Successful" });
+      res.status(200).json({ success: true, message: 'Successful' });
     } catch (error) {
-      console.log("error ==>", error);
-      res.status(404).json({ success: false, message: "User not found" });
+      console.log('error ==>', error);
+      res.status(404).json({ success: false, message: 'User not found' });
     }
   },
   onAddUserProfil: async (req, res) => {
     const { userID } = req.params;
     // security check
     if (userID != req?.userData?.userId) {
-      res.status(400).json({ success: false, message: "Bad request" });
+      res.status(400).json({ success: false, message: 'Bad request' });
     }
 
     try {
-      console.log("req.file ==<", req.file);
+      console.log('req.file ==<', req.file);
       let imageURL =
         req.protocol +
-        "://" +
+        '://' +
         req.headers.host +
-        "/server/public/images/" +
+        '/server/public/images/' +
         req.file.filename;
       await User.updateOne(
         { _id: req?.userData?.userId },
         { ProfilePicture: imageURL }
       );
 
-      return res.status(200).json({ success: true, message: "Successful" });
+      return res.status(200).json({ success: true, message: 'Successful' });
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: "Something went wrong." });
+        .json({ success: false, message: 'Something went wrong.' });
     }
   },
   onGetUserById: async (req, res) => {
