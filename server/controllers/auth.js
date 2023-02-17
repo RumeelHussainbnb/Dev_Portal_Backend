@@ -4,6 +4,7 @@ import moment from 'moment';
 // models
 import User from '../models/User.js';
 import { Member } from '../constant/enums.js';
+import { generateUsername } from 'unique-username-generator';
 import jwt from 'jsonwebtoken';
 const KEY = 'ghjsgdagfzdugfdhfljdshfidsufsd';
 mongoose.set('useFindAndModify', false);
@@ -155,8 +156,9 @@ export default {
           message: 'Successful',
         });
       } else {
+        const dummyUsername = generateUsername('_', 0, 15);
         user = await User.create({
-          Username: '',
+          Username: dummyUsername,
           Email: '',
           ProfilePicture: '',
           Token: '',

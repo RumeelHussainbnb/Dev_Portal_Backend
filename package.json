@@ -25,6 +25,7 @@
     "socket.io": "2.3.0",
     "tall": "^8.0.0",
     "twitter-api-sdk": "^1.2.1",
+    "unique-username-generator": "^1.1.3",
     "util": "^0.12.5",
     "uuid": "8.1.0"
   },
