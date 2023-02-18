@@ -8,6 +8,9 @@ import { generateUsername } from 'unique-username-generator';
 import jwt from 'jsonwebtoken';
 const KEY = 'ghjsgdagfzdugfdhfljdshfidsufsd';
 mongoose.set('useFindAndModify', false);
+import crypto from 'crypto';
+import { promisify } from 'util';
+const randomBytes = promisify(crypto.randomBytes);
 
 // third part
 import bcrypt from 'bcryptjs';
@@ -157,9 +160,17 @@ export default {
         });
       } else {
         const dummyUsername = generateUsername('_', 0, 15);
+        const dummyEmail = dummyUsername + 'example.com';
+
+        //Unique Name
+        //* 16 random bytes
+        const rawBytes = await randomBytes(1);
+        const randomNum = rawBytes.toString('hex');
+        let userName = 'user' + randomNum;
+        let userEmail = 'user' + randomNum + '@example.com';
         user = await User.create({
-          Username: dummyUsername,
-          Email: '',
+          Username: userName,
+          Email: userEmail,
           ProfilePicture: '',
           Token: '',
           TokenFirstCreatedAt: '',
