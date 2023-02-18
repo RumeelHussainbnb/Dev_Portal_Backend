@@ -165,7 +165,9 @@ export default {
             $project: {
               _id: 1,
               MostPopularContent: 1,
-              UserAllContents: 1,
+              UserAllContents: {
+                $slice: ['$UserAllContents', 7],
+              },
               MostRecentContent: {
                 $filter: {
                   input: '$UserAllContents',
