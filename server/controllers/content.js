@@ -382,6 +382,7 @@ export default {
             Lists: 1,
             Live: 1,
             User: 1,
+            CreatedAt: 1,
             TotalLikes: {
               $cond: {
                 if: { $isArray: '$LikedBy' },
