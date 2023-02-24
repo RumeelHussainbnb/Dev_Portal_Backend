@@ -1,6 +1,6 @@
 // models
 import User from '../models/User.js';
-import Content from '../models/Content.js';
+import { Member, Role } from '../constant/enums.js';
 import mongoose from 'mongoose';
 
 export default {
@@ -35,13 +35,13 @@ export default {
             CreatedAt: { $first: '$CreatedAt' },
             Token: { $first: '$Token' },
             PublicKey: { $first: '$PublicKey' },
-            Role: { $first: '$Role' },
+            Roles: { $first: '$Roles' },
             Country: { $first: '$Country' },
             Author: { $first: '$Author' },
             Bio: { $first: '$Bio' },
             Email: { $first: '$Email' },
             ProfilePicture: { $first: '$ProfilePicture' },
-            Skils: { $first: '$Skils' },
+            Skills: { $first: '$Skills' },
             TotalLikes: {
               $sum: {
                 $cond: {
@@ -72,6 +72,37 @@ export default {
       res.status(400).json({ success: false });
     }
   },
+  onGetMartians: async (req, res) => {
+    try {
+      const keyword = req.query.keyword;
+      const country = req.query.country;
+      const martian = req.query.martian;
+      const keywordRegex = new RegExp(keyword, 'i'); // i for case insensitive
+      const countryRegex = new RegExp(country, 'i');
+      const martianRegex = new RegExp(martian, 'i');
+      const page = parseInt(req.query.pageNumber) || 1;
+      const perPage = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * perPage;
+      const result = {};
+      let totalMartains = 0;
+      let filterObject = {
+        ...(keyword !== '' && { Username: { $regex: keywordRegex } }),
+        ...(country !== '' && { Country: { $regex: countryRegex } }),
+        ...(martian !== '' && { MartianType: { $regex: martianRegex } }),
+        ...{ Roles: 'Martian' },
+      };
+
+      result.data = await User.find(filterObject)
+        .skip(skip)
+        .limit(perPage)
+        .exec();
+      totalMartains = await User.countDocuments(filterObject).exec();
+      result.totalMartains = totalMartains;
+      res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
+    }
+  },
   onGetUser: async (req, res) => {
     try {
       if (req.params.publicKey) {
@@ -92,9 +123,9 @@ export default {
 
     // security check
 
-    if (userID != req?.userData?.userId) {
-      return res.status(400).json({ success: false, message: 'Bad request' });
-    }
+    // if (userID != req?.userData?.userId) {
+    //   return res.status(400).json({ success: false, message: 'Bad request' });
+    // }
 
     try {
       const user = await User.findOne({ _id: userID });
@@ -124,14 +155,15 @@ export default {
               Password: { $first: '$Password' },
               CreatedAt: { $first: '$CreatedAt' },
               Token: { $first: '$Token' },
+              Languages: { $first: '$Languages' },
               PublicKey: { $first: '$PublicKey' },
-              Role: { $first: '$Role' },
+              Roles: { $first: '$Roles' },
               Country: { $first: '$Country' },
               Author: { $first: '$Author' },
               Bio: { $first: '$Bio' },
               Email: { $first: '$Email' },
               ProfilePicture: { $first: '$ProfilePicture' },
-              Skils: { $first: '$Skils' },
+              Skills: { $first: '$Skills' },
               TotalArticles: {
                 $sum: 1,
               },
@@ -179,13 +211,14 @@ export default {
               Password: 1,
               CreatedAt: 1,
               PublicKey: 1,
-              Role: 1,
+              Roles: 1,
               Country: 1,
+              Languages: 1,
               Author: 1,
               Bio: 1,
               Email: 1,
               ProfilePicture: 1,
-              Skils: 1,
+              Skills: 1,
               TotalArticles: 1,
               TotalLikes: 1,
               TotalViews: 1,
@@ -226,9 +259,9 @@ export default {
   onGetUserProfile: async (req, res) => {
     const { userID } = req.params;
     // security check
-    if (userID != req?.userData?.userId) {
-      return res.status(400).json({ success: false, message: 'Bad request' });
-    }
+    // if (userID != req?.userData?.userId) {
+    //   return res.status(400).json({ success: false, message: 'Bad request' });
+    // }
 
     try {
       const user = await User.findOne({ _id: userID });
@@ -270,11 +303,17 @@ export default {
       const tempUser = await User.findOne({ _id: userID });
       let updatedUser = {
         Username: req.body.Username,
+        FirstName: req.body.FirstName,
+        LastName: req.body.LastName,
         ProfilePicture: req.body.ProfilePicture,
         Bio: req.body.Bio,
-        Skils: req.body.Skils,
+        Skills: req.body.Skills,
         Country: req.body.Country,
         Email: req.body.Email,
+        MartianType: req.body.MartianType,
+        City: req.body.City,
+        Languages: req.body.Languages,
+        Roles: req.body.Roles,
         Author: {
           Member: tempUser?.Author?.Member,
           SocialLinks: req.body?.Author?.SocialLinks
@@ -340,6 +379,62 @@ export default {
       res.status(200).json(user);
     } catch (error) {
       res.status(400).json({ success: false });
+    }
+  },
+  onCreateUser: async (req, res) => {
+    // extracting data from body
+    const {
+      PublicKey,
+      FirstName,
+      LastName,
+      Email,
+      ImageUrl,
+      Expertise,
+      MartianType,
+      Country,
+      City,
+      Languages,
+      BioGraphy,
+      Roles,
+    } = req.body;
+    let user = {};
+    try {
+      let userExist = await User.findOne({ PublicKey: PublicKey });
+      if (!userExist) {
+        user = await User.create({
+          Username: FirstName + ' ' + LastName,
+          Email: Email,
+          ProfilePicture: ImageUrl,
+          Token: '',
+          TokenFirstCreatedAt: '',
+          PublicKey: PublicKey,
+          Roles: Roles,
+          Skills: Expertise,
+          Languages: Languages,
+          TokenUpdatedAt: '',
+          CreatedAt: new Date(),
+          Bio: BioGraphy,
+          Country: Country,
+          City: City,
+          Author: {
+            SocialLinks: [],
+            Member: Member[0],
+            RecognizationsAndAwards: [],
+            Certification: [],
+            MostPopular: [],
+            Contributions: [],
+          },
+          MartianType: MartianType,
+        });
+        return res.status(201).json({ success: true, user: user });
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'User With Public Key Already Exist!',
+        });
+      }
+    } catch (error) {
+      res.status(400).json({ success: false, message: error });
     }
   },
 };

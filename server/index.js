@@ -14,6 +14,7 @@ import userRouter from './routes/user.js';
 import tweetRouter from './routes/tweet.js';
 import contentRouter from './routes/content.js';
 import martianRouter from './routes/martian.js';
+import activityRouter from './routes/activity.js';
 
 const app = express();
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/user', userRouter);
 app.use('/tweets', tweetRouter);
 app.use('/content', contentRouter);
 app.use('/martian', martianRouter);
+app.use('/activity', activityRouter);
 app.use('/', adminRouter);
 
 /** catch 404 and forward to error handler */

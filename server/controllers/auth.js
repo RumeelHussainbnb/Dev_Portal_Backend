@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 import moment from 'moment';
 // models
 import User from '../models/User.js';
-import { Member } from '../constant/enums.js';
+import { Member, Role } from '../constant/enums.js';
 import { generateUsername } from 'unique-username-generator';
 import jwt from 'jsonwebtoken';
 const KEY = 'ghjsgdagfzdugfdhfljdshfidsufsd';
@@ -175,12 +175,12 @@ export default {
           Token: '',
           TokenFirstCreatedAt: '',
           PublicKey: PublicKey,
-          Role: 'User',
+          Roles: [Role[1]],
           TokenUpdatedAt: '',
           CreatedAt: new Date(),
           Bio: '',
           Country: '',
-          Skils: [],
+          Skills: [],
           Author: {
             SocialLinks: [],
             Member: Member[0],

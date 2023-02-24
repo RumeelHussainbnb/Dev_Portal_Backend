@@ -8,6 +8,16 @@ const UserSchema = new mongoose.Schema({
     unique: false,
     maxlength: [100, 'Username cannot be more than 100 characters'],
   },
+  FirstName: {
+    type: String,
+
+    maxlength: [100, 'First Name cannot be more than 100 characters'],
+  },
+  LastName: {
+    type: String,
+
+    maxlength: [100, 'Last Name cannot be more than 100 characters'],
+  },
   MartianId: {
     type: mongoose.Schema.ObjectId,
   },
@@ -35,8 +45,8 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     maxlength: [100, 'PublicKey should not be more than 100 characters'],
   },
-  Role: {
-    type: String,
+  Roles: {
+    type: [String],
     enum: Role,
   },
   TokenUpdatedAt: {
@@ -55,13 +65,19 @@ const UserSchema = new mongoose.Schema({
   Country: {
     type: String,
   },
+  City: {
+    type: String,
+  },
+  Languages: {
+    type: String,
+  },
   ForgetPasswordLinkExpire: {
     type: Date,
   },
   ForgetPasswordLink: {
     type: String,
   },
-  Skils: { type: Array },
+  Skills: { type: Array },
   Author: {
     SocialLinks: [{ Link: String, Name: String }],
     Member: { type: String, enum: Member },
@@ -69,6 +85,10 @@ const UserSchema = new mongoose.Schema({
     Certification: [{ Name: String, Organization: String }],
     MostPopular: [{ Name: String, Organization: String }],
     Contributions: [{ Name: String, Organization: String }],
+  },
+  MartianType: {
+    type: String,
+    default: undefined,
   },
 });
 
