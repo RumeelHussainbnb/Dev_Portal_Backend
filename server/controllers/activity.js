@@ -57,7 +57,7 @@ export default {
       const data = req.body;
 
       const updatedActivity = await Activity.findOneAndUpdate(
-        { userId: data.userId },
+        { _id: data.id },
         {
           $set: {
             date: data.date,
