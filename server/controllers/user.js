@@ -63,9 +63,9 @@ export default {
           },
         },
       ])
-        .limit(10)
         .sort({ TotalLikes: -1, TotalViews: -1, TotalArticles: -1 })
-        .skip((page - 1) * 10);
+        .skip((parseInt(page) - 1) * 10)
+        .limit(10);
       const usersCount = await User.countDocuments(filterObject).exec();
       res.status(200).json({ success: true, data: { users, usersCount } });
     } catch (error) {
