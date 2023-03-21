@@ -715,36 +715,28 @@ export default {
     }
   },
   onPostContentBnbNewsletters: async (req, res) => {
-    const key = req.headers['PublicKey'];
-    const isAdmin = await validateKey(key);
     const position = await calculatePositionNo('newsletters');
-    if (true) {
-      try {
-        const data = req.body;
-        console.log('data ===>', data);
-        //split string into array by space then join array with '-'
-        let titleSpacesRemoved = data.Title.split(' ').join('-');
-        const content = await Content.create({
-          Title: data.Title,
-          Url: process.env.HOME_URL + '/newsletters/' + titleSpacesRemoved,
-          SK: titleSpacesRemoved,
-          Author: data.Author,
-          Position: position,
-          ContentStatus: 'active',
-          ContentType: 'newsletters',
-          ContentMarkdown: data.ContentMarkdown,
-          Description: data.Description,
-          //                    Img: data.Img
-        });
-        res.status(201).json({ success: true, data: content });
-      } catch (error) {
-        res.status(400).json({ success: false, error: error });
-      }
-    } else {
-      res.status(403).json({
-        success: false,
-        data: 'You do not have permission to add newsletter',
+
+    try {
+      const data = req.body;
+
+      //split string into array by space then join array with '-'
+      let titleSpacesRemoved = data.Title.split(' ').join('-');
+      const content = await Content.create({
+        Title: data.Title,
+        Url: process.env.HOME_URL + '/newsletters/' + titleSpacesRemoved,
+        SK: titleSpacesRemoved,
+        Author: data.Author,
+        Position: position,
+        ContentStatus: 'active',
+        ContentType: 'newsletters',
+        ContentMarkdown: data.ContentMarkdown,
+        Description: data.Description,
+        //                    Img: data.Img
       });
+      res.status(201).json({ success: true, data: content });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
     }
   },
 };
