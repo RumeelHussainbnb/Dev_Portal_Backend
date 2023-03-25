@@ -474,7 +474,7 @@ export default {
         Description: data.Description,
         ContentMarkdown: data?.ContentMarkdown,
         SK: get_random_sk,
-        ContentType: data.ContentType,
+        ContentType: data.ContentType.toLowerCase(),
         ContentStatus: data.ContentStatus,
         Position: position,
         List: data.List,
@@ -495,6 +495,7 @@ export default {
     try {
       const data = req.body;
       data['PublishedAt'] = new Date();
+      data['ContentType'] = data.ContentType.toLowerCase();
       await Content.updateMany(
         { ContentType: data.ContentType },
         { $set: { SpecialTag: '0' } }
