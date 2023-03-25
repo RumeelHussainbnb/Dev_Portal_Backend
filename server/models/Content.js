@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+const { Schema } = mongoose;
 
 const ContentSchema = new mongoose.Schema({
   Title: {
@@ -23,13 +24,12 @@ const ContentSchema = new mongoose.Schema({
     type: String,
     require: true,
     trim: true,
-    maxlength: [5000, 'Description cannot be more than 5000 characters'],
+    maxlength: [20000, 'ContentMarkdown cannot be more than 20000 characters'],
   },
   ContentMarkdown: {
     type: String,
     require: true,
     trim: true,
-    maxlength: [20000, 'ContentMarkdown cannot be more than 20000 characters'],
   },
   ContentType: {
     type: String,
@@ -104,6 +104,15 @@ const ContentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
     require: true,
+  },
+  User: { type: Schema.Types.ObjectId, ref: 'User' },
+  LikedBy: {
+    type: Array,
+    require: false,
+  },
+  ViewedBy: {
+    type: Array,
+    require: false,
   },
 });
 
