@@ -465,16 +465,17 @@ export default {
       const image = data.ImageUrl;
       //images.length >= 1 ? images[1] : images.length > 0 ? images[0] : '';
       const get_random_sk = await random_sk();
-      const position = await calculatePositionNo(data.ContentType);
+      const contentType = data.ContentType.toLowerCase();
+      const position = await calculatePositionNo(contentType);
       const content = await Content.create({
-        PlaylistID: data.ContentType == 'playlist' ? data.PlaylistID : '',
+        PlaylistID: contentType == 'playlist' ? data.PlaylistID : '',
         User: data.UserID,
         Title: data.Title,
         Author: data.Author,
         Description: data.Description,
         ContentMarkdown: data?.ContentMarkdown,
         SK: get_random_sk,
-        ContentType: data.ContentType.toLowerCase(),
+        ContentType: contentType,
         ContentStatus: data.ContentStatus,
         Position: position,
         List: data.List,
