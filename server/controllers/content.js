@@ -571,6 +571,9 @@ export default {
         ContentStatus: {
           $ne: 'submitted',
         },
+        ContentType: {
+          $ne: 'newsletters',
+        },
       })
         .populate('User')
         .sort({
