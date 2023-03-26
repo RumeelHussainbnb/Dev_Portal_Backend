@@ -465,17 +465,16 @@ export default {
       const image = data.ImageUrl;
       //images.length >= 1 ? images[1] : images.length > 0 ? images[0] : '';
       const get_random_sk = await random_sk();
-      const contentType = data.ContentType.toLowerCase();
-      const position = await calculatePositionNo(contentType);
+      const position = await calculatePositionNo(data.ContentType);
       const content = await Content.create({
-        PlaylistID: contentType == 'playlist' ? data.PlaylistID : '',
+        PlaylistID: data.ContentType == 'playlist' ? data.PlaylistID : '',
         User: data.UserID,
         Title: data.Title,
         Author: data.Author,
         Description: data.Description,
         ContentMarkdown: data?.ContentMarkdown,
         SK: get_random_sk,
-        ContentType: contentType,
+        ContentType: data.ContentType,
         ContentStatus: data.ContentStatus,
         Position: position,
         List: data.List,
@@ -496,7 +495,6 @@ export default {
     try {
       const data = req.body;
       data['PublishedAt'] = new Date();
-      data['ContentType'] = data.ContentType.toLowerCase();
       await Content.updateMany(
         { ContentType: data.ContentType },
         { $set: { SpecialTag: '0' } }
