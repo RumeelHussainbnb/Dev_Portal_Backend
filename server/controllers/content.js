@@ -566,9 +566,11 @@ export default {
   onGetContentWithSpecialTagNEW: async (req, res) => {
     try {
       const contents = await Content.find({
-        SpecialTag: 'New',
         ContentStatus: {
           $ne: 'submitted',
+        },
+        ContentType: {
+          $ne: 'newsletters',
         },
       })
         .populate('User')
