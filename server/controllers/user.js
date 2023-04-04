@@ -420,7 +420,7 @@ export default {
           City: City,
           Author: {
             SocialLinks: [],
-            Member: Member[0],
+            Member: Member[3],
             RecognizationsAndAwards: [],
             Certification: [],
             MostPopular: [],
