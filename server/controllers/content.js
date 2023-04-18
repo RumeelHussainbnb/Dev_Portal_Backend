@@ -570,7 +570,7 @@ export default {
           $ne: 'submitted',
         },
         ContentType: {
-          $ne: 'newsletters',
+          $nin: ['newsletters', 'playlist'],
         },
       })
         .populate('User')
