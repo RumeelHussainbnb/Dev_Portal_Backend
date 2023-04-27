@@ -6,36 +6,36 @@ const QuestionSchema = new mongoose.Schema({
     type: String,
     require: true,
     trim: true,
-    maxlength: [100, 'Question cannot be more than 2048 characters'],
+    maxlength: [2048, 'Question cannot be more than 2048 characters'],
   },
   A: {
     type: String,
     require: true,
     trim: true,
-    maxlength: [100, 'Option A cannot be more than 100 characters'],
+    maxlength: [2048, 'Option A cannot be more than 2048 characters'],
   },
   B: {
     type: String,
     require: true,
     trim: true,
-    maxlength: [100, 'Option B  cannot be more than 100 characters'],
+    maxlength: [2048, 'Option B  cannot be more than 2048 characters'],
   },
   C: {
     type: String,
     require: true,
     trim: true,
-    maxlength: [100, 'Option C  cannot be more than 100 characters'],
+    maxlength: [2048, 'Option C  cannot be more than 2048 characters'],
   },
   D: {
     type: String,
     require: true,
     trim: true,
-    maxlength: [100, 'Option D  cannot be more than 100 characters'],
+    maxlength: [2048, 'Option D  cannot be more than 2048 characters'],
   },
 
   CorrectOption: {
     type: String,
-    maxlength: [100, 'CorrectOption cannot be more than 100 characters'],
+    maxlength: [2048, 'CorrectOption cannot be more than 2048 characters'],
   },
 });
 
@@ -46,7 +46,7 @@ const QuizSchema = new mongoose.Schema(
       type: String,
       require: true,
       trim: true,
-      maxlength: [100, 'Title Name cannot be more than 100 characters'],
+      maxlength: [2048, 'Title Name cannot be more than 2048 characters'],
     },
     Description: {
       type: String,

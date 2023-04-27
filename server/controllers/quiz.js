@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 // models
 import Quiz from '../models/Quiz.js';
+import CompletedQuizSchema from '../models/CompletedQuiz.js';
 
 export default {
   onGetAllQuizs: async (req, res) => {
@@ -65,6 +66,45 @@ export default {
       const deletedQuiz = await Quiz.deleteOne({ _id: req.query._id });
 
       res.status(200).json({ success: true, data: deletedQuiz });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
+    }
+  },
+  onPostQuizResult: async (req, res) => {
+    try {
+      const {
+        CourseId,
+        UserId,
+        QuizId,
+        TotalQuestions,
+        TotalScore,
+        CorrectAnswers,
+        WrongAnswers,
+        Percentage,
+      } = req.body;
+      const completedQuiz = await CompletedQuizSchema.create({
+        CourseId,
+        UserId,
+        QuizId,
+        TotalQuestions,
+        TotalScore,
+        CorrectAnswers,
+        WrongAnswers,
+        Percentage,
+      });
+
+      res.status(201).json({ success: true, data: completedQuiz });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
+    }
+  },
+  onGetQuizesResultByUserId: async (req, res) => {
+    try {
+      let userId = mongoose.Types.ObjectId(req.query.userId);
+      const getQuizzesResult = await CompletedQuizSchema.aggregate([
+        { $match: { UserId: userId } },
+      ]);
+      res.status(200).json({ success: true, data: getQuizzesResult });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
