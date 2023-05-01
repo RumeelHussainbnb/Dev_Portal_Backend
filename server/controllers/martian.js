@@ -44,7 +44,7 @@ export default {
           CreatedAt: '',
           Author: {
             SocialLinks: [],
-            Member: Member[0],
+            Member: Member[3],
             Contributions: [],
             RecognizationsAndAwards: [],
             Certification: [],

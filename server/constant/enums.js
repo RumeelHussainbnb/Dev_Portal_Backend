@@ -1,5 +1,5 @@
 export const Role = ['Admin', 'User', 'Martian'];
-export const Member = ['Gold', 'Platinum', 'Silver'];
+export const Member = ['Gold', 'Platinum', 'Silver', 'Brown'];
 export const RecognizationsAndAwards = [
   'MVP_medal',
   'Speaker_medal',

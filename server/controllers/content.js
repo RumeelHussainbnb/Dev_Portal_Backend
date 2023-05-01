@@ -678,9 +678,10 @@ export default {
       } // Done till here
     } else if (req.params.videoID === undefined) {
       try {
-        contents = await Content.find({ PlaylistID: req.params.type }).populate(
-          'User'
-        );
+        contents = await Content.find({
+          PlaylistID: req.params.type,
+          ContentStatus: 'active',
+        }).populate('User');
 
         res.status(200).json(contents);
       } catch (error) {
