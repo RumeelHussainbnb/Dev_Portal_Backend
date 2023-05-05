@@ -25,11 +25,30 @@ export default {
         },
         { $unwind: { path: '$Contents', preserveNullAndEmptyArrays: true } },
         {
+          $project: {
+            _id: 1,
+            Username: 1,
+            Password: 1,
+            CreatedAt: 1,
+            Token: 1,
+            PublicKey: 1,
+            Roles: 1,
+            Country: 1,
+            Author: 1,
+            Bio: 1,
+            Email: 1,
+            ProfilePicture: 1,
+            Skills: 1,
+            Contents: 1,
+            ArticleCount: {
+              $cond: [{ $eq: [{ $ifNull: ['$Contents', 0] }, 0] }, 0, 1],
+            },
+          },
+        },
+        {
           $group: {
             _id: '$_id',
-            TotalArticles: {
-              $count: {},
-            },
+            TotalArticles: { $sum: '$ArticleCount' },
             Username: { $first: '$Username' },
             Password: { $first: '$Password' },
             CreatedAt: { $first: '$CreatedAt' },
