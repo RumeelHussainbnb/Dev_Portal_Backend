@@ -1,16 +1,24 @@
-import Content from "../models/Content";
-import ContentProgress from "../models/ContentProgress";
-import User from "../models/User";
-
+import Content from "../models/Content.js";
+import UserProgress from "../models/UserProgress.js";
 export default {
-  onCreateContentProgress: async (req, res) => {
+  onFindOrCreateContentProgress: async (req, res) => {
     try {
       const { courseId, userId } = req.body;
-      const contentProgress = await ContentProgress.create({
+
+      let contentProgress = await UserProgress.findOne({
         ContentId: courseId,
         UserId: userId,
       });
-      res.status(201).json({ success: true, data: contentProgress });
+
+      if (!contentProgress) {
+        contentProgress = await UserProgress.create({
+          ContentId: courseId,
+          UserId: userId,
+        });
+        res.status(201).json({ success: true, data: contentProgress });
+      } else {
+        res.status(200).json({ success: true, data: contentProgress });
+      }
     } catch (error) {
       res.status(400).json({
         success: false,
@@ -22,8 +30,8 @@ export default {
   onGetUserProgress: async (req, res) => {
     try {
       const { userId } = req.query;
-      const contentProgress = await ContentProgress.find({ UserId: userId });
-      res.status(200).json({ success: true, data: contentProgress });
+      const userProgress = await UserProgress.find({ userId: userId });
+      res.status(200).json({ success: true, data: userProgress });
     } catch (error) {
       res.status(400).json({
         success: false,
@@ -31,10 +39,11 @@ export default {
       });
     }
   },
+
   onUpdateUserProgress: async (req, res) => {
     try {
       const data = req.body;
-      const progress = await ContentProgress.findOneAndUpdate(
+      const progress = await UserProgress.findOneAndUpdate(
         { userId: data.userId, courseId: data.courseId },
         { complete: data.complete },
         { new: true, upsert: true }
@@ -53,7 +62,7 @@ export default {
   onCourseStatusCheck: async (req, res) => {
     try {
       const { userId, courseId } = req.query;
-      const contentProgress = await ContentProgress.findOne({
+      const contentProgress = await UserProgress.findOne({
         UserId: userId,
         ContentId: courseId,
       });

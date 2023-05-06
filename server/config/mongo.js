@@ -1,24 +1,25 @@
-import mongoose from 'mongoose';
-import config from './index.js';
+import mongoose from "mongoose";
+import config from "./index.js";
 
-const CONNECTION_URL = `mongodb://${config.db.url}/${config.db.name}`;
-//const CONNECTION_URL = `mongodb://127.0.0.1:27017/bnb`;
+// const CONNECTION_URL = `mongodb://${config.db.url}/${config.db.name}`;
+// const CONNECTION_URL = `mongodb+srv://shahzaib_nahi_ha:IsThisForShahzaib_@cluster0.updhl9l.mongodb.net/staging_bnb_chain_shahzaib`;
+const CONNECTION_URL = `mongodb://127.0.0.1:27017/bnb`;
 
 mongoose.connect(CONNECTION_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-mongoose.connection.on('connected', () => {
-  console.log('Mongo has connected succesfully');
+mongoose.connection.on("connected", () => {
+  console.log("Mongo has connected succesfully");
 });
-mongoose.connection.on('reconnected', () => {
-  console.log('Mongo has reconnected');
+mongoose.connection.on("reconnected", () => {
+  console.log("Mongo has reconnected");
 });
-mongoose.connection.on('error', (error) => {
-  console.log('Mongo connection has an error', error);
+mongoose.connection.on("error", (error) => {
+  console.log("Mongo connection has an error", error);
   mongoose.disconnect();
 });
-mongoose.connection.on('disconnected', () => {
-  console.log('Mongo connection is disconnected');
+mongoose.connection.on("disconnected", () => {
+  console.log("Mongo connection is disconnected");
 });

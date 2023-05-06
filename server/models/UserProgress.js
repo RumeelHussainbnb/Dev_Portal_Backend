@@ -1,14 +1,17 @@
 import mongoose from "mongoose";
 
-const LessonProgressSchema = new mongoose.Schema({
-  ContentId: {
+const UserProgressSchema = new mongoose.Schema({
+  CourseId: {
     type: mongoose.Schema.ObjectId,
+    ref: "Course",
   },
   UserId: {
     type: mongoose.Schema.ObjectId,
+    ref: "User",
   },
-  PreviousContentId: {
+  PreviousCourseId: {
     type: mongoose.Schema.ObjectId,
+    ref: "Course",
   },
   completed: {
     type: Boolean,
@@ -21,4 +24,4 @@ const LessonProgressSchema = new mongoose.Schema({
   },
 });
 
-const LessonProgress = mongoose.model("LessonProgress", LessonProgressSchema);
+export default mongoose.model("UserProgress", UserProgressSchema);

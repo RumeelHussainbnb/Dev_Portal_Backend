@@ -16,7 +16,8 @@ import contentRouter from "./routes/content.js";
 import martianRouter from "./routes/martian.js";
 import activityRouter from "./routes/activity.js";
 import quizRouter from "./routes/quiz.js";
-import userProgressRouter from "./routes/userProgress.js";
+import userProgressRouter from "./routes/UserProgress.js";
+import courseRouter from "./routes/course.js";
 
 const app = express();
 dotenv.config();
@@ -50,6 +51,7 @@ app.use("/martian", martianRouter);
 app.use("/activity", activityRouter);
 app.use("/quiz", quizRouter);
 app.use("/userProgress", userProgressRouter);
+app.use("/course", courseRouter);
 app.use("/", adminRouter);
 
 /** catch 404 and forward to error handler */
