@@ -1,24 +1,23 @@
-import Content from "../models/Content.js";
+import Course from "../models/Course.js";
 import UserProgress from "../models/UserProgress.js";
 export default {
-  onFindOrCreateContentProgress: async (req, res) => {
+  onFindOrCreateCourseProgress: async (req, res) => {
     try {
       const { courseId, userId } = req.body;
-
-      let contentProgress = await UserProgress.findOne({
-        ContentId: courseId,
+      console.log(courseId, userId);
+      let CourseProgress = await UserProgress.findOne({
+        CourseId: courseId,
         UserId: userId,
       });
-
-      if (!contentProgress) {
-        contentProgress = await UserProgress.create({
-          ContentId: courseId,
+      console.log(CourseProgress);
+      if (!CourseProgress) {
+        CourseProgress = await UserProgress.create({
+          CourseId: courseId,
           UserId: userId,
         });
-        res.status(201).json({ success: true, data: contentProgress });
-      } else {
-        res.status(200).json({ success: true, data: contentProgress });
       }
+      console.log(CourseProgress);
+      res.status(200).json({ success: true, data: CourseProgress });
     } catch (error) {
       res.status(400).json({
         success: false,
@@ -43,14 +42,28 @@ export default {
   onUpdateUserProgress: async (req, res) => {
     try {
       const data = req.body;
+      console.log(data);
+      // update user progress
+
       const progress = await UserProgress.findOneAndUpdate(
-        { userId: data.userId, courseId: data.courseId },
-        { complete: data.complete },
-        { new: true, upsert: true }
+        {
+          UserId: data.userId,
+          CourseId: data.courseId,
+        },
+        {
+          completed: data.complete,
+        },
+        {
+          new: true,
+        }
       );
-      const previousContentId = await Content.findOne({ _id: data.courseId });
-      progress.previousContentId = previousContentId.previousContentId;
-      progress.save();
+      console.log(progress);
+      const previousCourse = await Course.findOne({ _id: data.courseId });
+      console.log(previousCourse);
+      progress.PreviousCourseId = previousCourse.previousCourse
+        ? previousCourse.previousCourse
+        : null;
+      await progress.save();
       res.status(200).json({ success: true, data: progress });
     } catch (error) {
       res.status(400).json({
@@ -59,14 +72,44 @@ export default {
       });
     }
   },
+
   onCourseStatusCheck: async (req, res) => {
     try {
-      const { userId, courseId } = req.query;
-      const contentProgress = await UserProgress.findOne({
+      const { courseId, userId } = req.query;
+      console.log(req.query);
+      console.log(courseId, userId);
+      const CourseProgress = await UserProgress.findOne({
         UserId: userId,
-        ContentId: courseId,
+        CourseId: courseId,
       });
-      res.status(200).json({ success: true, data: contentProgress });
+      console.log(CourseProgress);
+      res.status(200).json({ success: true, data: CourseProgress.completed });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  },
+
+  onBatchCreate: async (req, res) => {
+    try {
+      const { userId } = req.body;
+      const courses = await Course.find();
+      const coursesId = courses.map((course) => course._id);
+      for (let i = 0; i < coursesId.length; i++) {
+        const courseProgressCheck = await UserProgress.findOne({
+          UserId: userId,
+          CourseId: courseId,
+        });
+        if (!courseProgressCheck.complete) {
+          await UserProgress.create({
+            UserId: userId,
+            CourseId: coursesId[i],
+          });
+        }
+      }
+      res.status(200).json({ success: true });
     } catch (error) {
       res.status(400).json({
         success: false,

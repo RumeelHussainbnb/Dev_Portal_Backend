@@ -1,15 +1,17 @@
 // models
-import User from '../models/User.js';
-import { Member, Role } from '../constant/enums.js';
-import mongoose from 'mongoose';
+import User from "../models/User.js";
+import Course from "../models/Course.js";
+import UserProgress from "../models/UserProgress.js";
+import { Member, Role } from "../constant/enums.js";
+import mongoose from "mongoose";
 
 export default {
   onGetAllUser: async (req, res) => {
     try {
       const { page, name } = req.query;
-      const nameRegex = new RegExp(name, 'i'); // i for case insensitive
+      const nameRegex = new RegExp(name, "i"); // i for case insensitive
       let filterObject = {
-        ...(name !== '' && { Username: { $regex: nameRegex } }),
+        ...(name !== "" && { Username: { $regex: nameRegex } }),
       };
       const users = await User.aggregate([
         {
@@ -17,36 +19,36 @@ export default {
         },
         {
           $lookup: {
-            from: 'contents',
-            localField: '_id',
-            foreignField: 'User',
-            as: 'Contents',
+            from: "contents",
+            localField: "_id",
+            foreignField: "User",
+            as: "Contents",
           },
         },
-        { $unwind: { path: '$Contents', preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: "$Contents", preserveNullAndEmptyArrays: true } },
         {
           $group: {
-            _id: '$_id',
+            _id: "$_id",
             TotalArticles: {
               $count: {},
             },
-            Username: { $first: '$Username' },
-            Password: { $first: '$Password' },
-            CreatedAt: { $first: '$CreatedAt' },
-            Token: { $first: '$Token' },
-            PublicKey: { $first: '$PublicKey' },
-            Roles: { $first: '$Roles' },
-            Country: { $first: '$Country' },
-            Author: { $first: '$Author' },
-            Bio: { $first: '$Bio' },
-            Email: { $first: '$Email' },
-            ProfilePicture: { $first: '$ProfilePicture' },
-            Skills: { $first: '$Skills' },
+            Username: { $first: "$Username" },
+            Password: { $first: "$Password" },
+            CreatedAt: { $first: "$CreatedAt" },
+            Token: { $first: "$Token" },
+            PublicKey: { $first: "$PublicKey" },
+            Roles: { $first: "$Roles" },
+            Country: { $first: "$Country" },
+            Author: { $first: "$Author" },
+            Bio: { $first: "$Bio" },
+            Email: { $first: "$Email" },
+            ProfilePicture: { $first: "$ProfilePicture" },
+            Skills: { $first: "$Skills" },
             TotalLikes: {
               $sum: {
                 $cond: {
-                  if: { $isArray: '$Contents.LikedBy' },
-                  then: { $size: '$Contents.LikedBy' },
+                  if: { $isArray: "$Contents.LikedBy" },
+                  then: { $size: "$Contents.LikedBy" },
                   else: 0,
                 },
               },
@@ -54,8 +56,8 @@ export default {
             TotalViews: {
               $sum: {
                 $cond: {
-                  if: { $isArray: '$Contents.ViewedBy' },
-                  then: { $size: '$Contents.ViewedBy' },
+                  if: { $isArray: "$Contents.ViewedBy" },
+                  then: { $size: "$Contents.ViewedBy" },
                   else: 0,
                 },
               },
@@ -77,19 +79,19 @@ export default {
       const keyword = req.query.keyword;
       const country = req.query.country;
       const martian = req.query.martian;
-      const keywordRegex = new RegExp(keyword, 'i'); // i for case insensitive
-      const countryRegex = new RegExp(country, 'i');
-      const martianRegex = new RegExp(martian, 'i');
+      const keywordRegex = new RegExp(keyword, "i"); // i for case insensitive
+      const countryRegex = new RegExp(country, "i");
+      const martianRegex = new RegExp(martian, "i");
       const page = parseInt(req.query.pageNumber) || 1;
       const perPage = parseInt(req.query.limit) || 10;
       const skip = (page - 1) * perPage;
       const result = {};
       let totalMartains = 0;
       let filterObject = {
-        ...(keyword !== '' && { Username: { $regex: keywordRegex } }),
-        ...(country !== '' && { Country: { $regex: countryRegex } }),
-        ...(martian !== '' && { MartianType: { $regex: martianRegex } }),
-        ...{ Roles: 'Martian' },
+        ...(keyword !== "" && { Username: { $regex: keywordRegex } }),
+        ...(country !== "" && { Country: { $regex: countryRegex } }),
+        ...(martian !== "" && { MartianType: { $regex: martianRegex } }),
+        ...{ Roles: "Martian" },
       };
 
       result.data = await User.find(filterObject)
@@ -111,7 +113,7 @@ export default {
         });
         return res.status(200).json(user);
       }
-      res.status(200).json('PublicKey missing');
+      res.status(200).json("PublicKey missing");
     } catch (error) {
       res.status(400).json({ success: false });
     }
@@ -139,39 +141,39 @@ export default {
           },
           {
             $lookup: {
-              from: 'contents',
-              localField: '_id',
-              foreignField: 'User',
-              as: 'Contents',
+              from: "contents",
+              localField: "_id",
+              foreignField: "User",
+              as: "Contents",
             },
           },
-          { $unwind: { path: '$Contents', preserveNullAndEmptyArrays: true } },
+          { $unwind: { path: "$Contents", preserveNullAndEmptyArrays: true } },
           {
             $group: {
-              _id: '$_id',
-              MostPopularContent: { $addToSet: '$Contents' },
-              UserAllContents: { $addToSet: '$Contents' },
-              Username: { $first: '$Username' },
-              Password: { $first: '$Password' },
-              CreatedAt: { $first: '$CreatedAt' },
-              Token: { $first: '$Token' },
-              Languages: { $first: '$Languages' },
-              PublicKey: { $first: '$PublicKey' },
-              Roles: { $first: '$Roles' },
-              Country: { $first: '$Country' },
-              Author: { $first: '$Author' },
-              Bio: { $first: '$Bio' },
-              Email: { $first: '$Email' },
-              ProfilePicture: { $first: '$ProfilePicture' },
-              Skills: { $first: '$Skills' },
+              _id: "$_id",
+              MostPopularContent: { $addToSet: "$Contents" },
+              UserAllContents: { $addToSet: "$Contents" },
+              Username: { $first: "$Username" },
+              Password: { $first: "$Password" },
+              CreatedAt: { $first: "$CreatedAt" },
+              Token: { $first: "$Token" },
+              Languages: { $first: "$Languages" },
+              PublicKey: { $first: "$PublicKey" },
+              Roles: { $first: "$Roles" },
+              Country: { $first: "$Country" },
+              Author: { $first: "$Author" },
+              Bio: { $first: "$Bio" },
+              Email: { $first: "$Email" },
+              ProfilePicture: { $first: "$ProfilePicture" },
+              Skills: { $first: "$Skills" },
               TotalArticles: {
                 $sum: 1,
               },
               TotalLikes: {
                 $sum: {
                   $cond: {
-                    if: { $isArray: '$Contents.LikedBy' },
-                    then: { $size: '$Contents.LikedBy' },
+                    if: { $isArray: "$Contents.LikedBy" },
+                    then: { $size: "$Contents.LikedBy" },
                     else: 0,
                   },
                 },
@@ -179,8 +181,8 @@ export default {
               TotalViews: {
                 $sum: {
                   $cond: {
-                    if: { $isArray: '$Contents.ViewedBy' },
-                    then: { $size: '$Contents.ViewedBy' },
+                    if: { $isArray: "$Contents.ViewedBy" },
+                    then: { $size: "$Contents.ViewedBy" },
                     else: 0,
                   },
                 },
@@ -189,7 +191,7 @@ export default {
           },
           {
             $unwind: {
-              path: '$MostPopularContent',
+              path: "$MostPopularContent",
               preserveNullAndEmptyArrays: true,
             },
           },
@@ -198,14 +200,14 @@ export default {
               _id: 1,
               MostPopularContent: 1,
               UserAllContents: {
-                $slice: ['$UserAllContents', 7],
+                $slice: ["$UserAllContents", 7],
               },
               MostRecentContent: {
                 $filter: {
-                  input: '$UserAllContents',
-                  as: 'item',
+                  input: "$UserAllContents",
+                  as: "item",
                   cond: {
-                    $gt: ['$$item.CreatedAt', lastThreeMonths],
+                    $gt: ["$$item.CreatedAt", lastThreeMonths],
                   },
                 },
               },
@@ -226,15 +228,15 @@ export default {
               TotalViews: 1,
               EachContentLike: {
                 $cond: {
-                  if: { $isArray: '$MostPopularContent.LikedBy' },
-                  then: { $size: '$MostPopularContent.LikedBy' },
+                  if: { $isArray: "$MostPopularContent.LikedBy" },
+                  then: { $size: "$MostPopularContent.LikedBy" },
                   else: 0,
                 },
               },
               EachContentView: {
                 $cond: {
-                  if: { $isArray: '$MostPopularContent.ViewedBy' },
-                  then: { $size: '$MostPopularContent.ViewedBy' },
+                  if: { $isArray: "$MostPopularContent.ViewedBy" },
+                  then: { $size: "$MostPopularContent.ViewedBy" },
                   else: 0,
                 },
               },
@@ -247,15 +249,15 @@ export default {
         return res.status(200).json({
           success: true,
           data: userWithAllContentRelatedData[0],
-          message: 'Successful',
+          message: "Successful",
         });
       } else {
         return res
           .status(404)
-          .json({ success: false, data: {}, message: 'User not found' });
+          .json({ success: false, data: {}, message: "User not found" });
       }
     } catch (error) {
-      res.status(404).json({ success: false, message: 'User not found' });
+      res.status(404).json({ success: false, message: "User not found" });
     }
   },
   onGetUserProfile: async (req, res) => {
@@ -275,21 +277,21 @@ export default {
           Author: {
             ...updatedUser.Author,
             Rank: 808,
-            Read: '12.2K',
-            Reputation: '13K',
-            Like: '5',
+            Read: "12.2K",
+            Reputation: "13K",
+            Like: "5",
           },
         };
         return res
           .status(200)
-          .json({ success: true, data: updatedUser, message: 'Successful' });
+          .json({ success: true, data: updatedUser, message: "Successful" });
       } else {
         return res
           .status(404)
-          .json({ success: false, data: {}, message: 'User not found' });
+          .json({ success: false, data: {}, message: "User not found" });
       }
     } catch (error) {
-      res.status(404).json({ success: false, message: 'User not found' });
+      res.status(404).json({ success: false, message: "User not found" });
     }
   },
 
@@ -340,37 +342,37 @@ export default {
         },
       };
       await User.updateOne({ _id: userID }, updatedUser);
-      res.status(200).json({ success: true, message: 'Successful' });
+      res.status(200).json({ success: true, message: "Successful" });
     } catch (error) {
-      console.log('error ==>', error);
-      res.status(404).json({ success: false, message: 'User not found' });
+      console.log("error ==>", error);
+      res.status(404).json({ success: false, message: "User not found" });
     }
   },
   onAddUserProfil: async (req, res) => {
     const { userID } = req.params;
     // security check
     if (userID != req?.userData?.userId) {
-      res.status(400).json({ success: false, message: 'Bad request' });
+      res.status(400).json({ success: false, message: "Bad request" });
     }
 
     try {
-      console.log('req.file ==<', req.file);
+      console.log("req.file ==<", req.file);
       let imageURL =
         req.protocol +
-        '://' +
+        "://" +
         req.headers.host +
-        '/server/public/images/' +
+        "/server/public/images/" +
         req.file.filename;
       await User.updateOne(
         { _id: req?.userData?.userId },
         { ProfilePicture: imageURL }
       );
 
-      return res.status(200).json({ success: true, message: 'Successful' });
+      return res.status(200).json({ success: true, message: "Successful" });
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'Something went wrong.' });
+        .json({ success: false, message: "Something went wrong." });
     }
   },
   onGetUserById: async (req, res) => {
@@ -404,16 +406,16 @@ export default {
       let userExist = await User.findOne({ PublicKey: PublicKey });
       if (!userExist) {
         user = await User.create({
-          Username: FirstName + ' ' + LastName,
+          Username: FirstName + " " + LastName,
           Email: Email,
           ProfilePicture: ImageUrl,
-          Token: '',
-          TokenFirstCreatedAt: '',
+          Token: "",
+          TokenFirstCreatedAt: "",
           PublicKey: PublicKey,
           Roles: Roles,
           Skills: Expertise,
           Languages: Languages,
-          TokenUpdatedAt: '',
+          TokenUpdatedAt: "",
           CreatedAt: new Date(),
           Bio: BioGraphy,
           Country: Country,
@@ -428,11 +430,36 @@ export default {
           },
           MartianType: MartianType,
         });
-        return res.status(201).json({ success: true, user: user });
+
+        const userId = user._id;
+
+        // Get all courses
+        const courses = await Course.find({}, { _id: 1 });
+
+        // Get all Course id
+        const courseIds = courses.map((course) => course._id);
+
+        // create course record
+        const userProgress = courseIds.map(async (courseId) => {
+          await UserProgress.create({
+            UserId: userId,
+            CourseId: courseId,
+          });
+        });
+
+        // await for all promises
+        await Promise.all(userProgress);
+
+        return res.status(201).json({
+          success: true,
+          user: user,
+          userProgress: userProgress,
+          message: "User Created Successfully!",
+        });
       } else {
         return res.status(400).json({
           success: false,
-          message: 'User With Public Key Already Exist!',
+          message: "User With Public Key Already Exist!",
         });
       }
     } catch (error) {

@@ -4,16 +4,13 @@ export default {
   onCreateCourse: async (req, res) => {
     try {
       const data = req.body;
-
       let findCourse;
       findCourse = await Course.find().sort({ section: -1 }).limit(1);
       findCourse = findCourse.length > 0 ? findCourse[0]._id : null;
-      console.log(findCourse);
       const course = await Course.create({
         name: data.name,
         markDownContent: data.markdown,
         section: data.section,
-        content: courseContent._id,
         previousCourse: findCourse,
       });
       res.status(201).json({ success: true, data: course });

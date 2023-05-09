@@ -1,12 +1,13 @@
 import express from "express";
 
-import contentProgress from "../controllers/courseProgress.js";
+import UserProgress from "../controllers/courseProgress.js";
 
 const router = express.Router();
 
-router.get("/", contentProgress.onGetUserProgress);
-router.post("/", contentProgress.onFindOrCreateContentProgress);
-router.put("/", contentProgress.onUpdateUserProgress);
-router.get("/coursestatus", contentProgress.onCourseStatusCheck);
+router.get("/", UserProgress.onFindOrCreateCourseProgress);
+router.get("/allprogress/:id", UserProgress.onGetUserProgress);
+router.put("/", UserProgress.onUpdateUserProgress);
+router.get("/check/:courseId/:userId", UserProgress.onCourseStatusCheck);
+router.get("/batch", UserProgress.onBatchCreate);
 
 export default router;
