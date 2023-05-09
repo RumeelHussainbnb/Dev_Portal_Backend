@@ -23,5 +23,6 @@ const UserProgressSchema = new mongoose.Schema({
     // required: true
   },
 });
+UserProgressSchema.index({ UserId: 1, CourseId: 1 }, { unique: true });
 
 export default mongoose.model("UserProgress", UserProgressSchema);

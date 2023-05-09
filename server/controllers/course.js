@@ -5,7 +5,7 @@ export default {
     try {
       const data = req.body;
       let findCourse;
-      findCourse = await Course.find().sort({ section: -1 }).limit(1);
+      findCourse = await Course.find().sort({ id: -1 }).limit(1);
       findCourse = findCourse.length > 0 ? findCourse[0]._id : null;
       const course = await Course.create({
         name: data.name,

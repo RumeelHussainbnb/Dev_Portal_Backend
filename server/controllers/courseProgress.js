@@ -1,15 +1,14 @@
+import mongoose from "mongoose";
 import Course from "../models/Course.js";
 import UserProgress from "../models/UserProgress.js";
 export default {
   onFindOrCreateCourseProgress: async (req, res) => {
     try {
       const { courseId, userId } = req.body;
-      console.log(courseId, userId);
       let CourseProgress = await UserProgress.findOne({
         CourseId: courseId,
         UserId: userId,
       });
-      console.log(CourseProgress);
       if (!CourseProgress) {
         CourseProgress = await UserProgress.create({
           CourseId: courseId,
@@ -42,13 +41,17 @@ export default {
   onUpdateUserProgress: async (req, res) => {
     try {
       const data = req.body;
-      console.log(data);
       // update user progress
+      console.log(data);
+      console.log({
+        UserId: mongoose.Types.ObjectId(data.userId),
+        CourseId: mongoose.Types.ObjectId(data.courseId),
+      });
 
       const progress = await UserProgress.findOneAndUpdate(
         {
-          UserId: data.userId,
-          CourseId: data.courseId,
+          UserId: mongoose.Types.ObjectId(data.userId),
+          CourseId: mongoose.Types.ObjectId(data.courseId),
         },
         {
           completed: data.complete,
@@ -59,11 +62,13 @@ export default {
       );
       console.log(progress);
       const previousCourse = await Course.findOne({ _id: data.courseId });
-      console.log(previousCourse);
-      progress.PreviousCourseId = previousCourse.previousCourse
-        ? previousCourse.previousCourse
-        : null;
-      await progress.save();
+      console.log("previous course", previousCourse.previousCourse);
+      //only update if the course has previous course
+      if (previousCourse.previousCourse !== null) {
+        console.log("previous course", previousCourse.previousCourse);
+        progress.PreviousCourseId = previousCourse.previousCourse;
+        await progress.save();
+      }
       res.status(200).json({ success: true, data: progress });
     } catch (error) {
       res.status(400).json({
@@ -75,14 +80,18 @@ export default {
 
   onCourseStatusCheck: async (req, res) => {
     try {
-      const { courseId, userId } = req.query;
-      console.log(req.query);
-      console.log(courseId, userId);
+      const { courseId, userId } = req.params;
       const CourseProgress = await UserProgress.findOne({
         UserId: userId,
         CourseId: courseId,
       });
-      console.log(CourseProgress);
+      if (!CourseProgress) {
+        const userProgress = await UserProgress.create({
+          UserId: userId,
+          CourseId: courseId,
+        });
+        res.status(200).json({ success: true, data: userProgress });
+      }
       res.status(200).json({ success: true, data: CourseProgress.completed });
     } catch (error) {
       res.status(400).json({
@@ -95,21 +104,23 @@ export default {
   onBatchCreate: async (req, res) => {
     try {
       const { userId } = req.body;
+      console.log(req);
+      console.log(userId);
       const courses = await Course.find();
       const coursesId = courses.map((course) => course._id);
       for (let i = 0; i < coursesId.length; i++) {
-        const courseProgressCheck = await UserProgress.findOne({
-          UserId: userId,
-          CourseId: courseId,
-        });
-        if (!courseProgressCheck.complete) {
+        try {
           await UserProgress.create({
             UserId: userId,
             CourseId: coursesId[i],
           });
+        } catch (error) {
+          continue; // continue the loop even if there's an error
         }
       }
-      res.status(200).json({ success: true });
+      const userProgress = await UserProgress.find({ userId: userId });
+
+      res.status(200).json({ success: true, data: userProgress });
     } catch (error) {
       res.status(400).json({
         success: false,

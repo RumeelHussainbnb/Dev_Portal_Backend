@@ -8,6 +8,6 @@ router.get("/", UserProgress.onFindOrCreateCourseProgress);
 router.get("/allprogress/:id", UserProgress.onGetUserProgress);
 router.put("/", UserProgress.onUpdateUserProgress);
 router.get("/check/:courseId/:userId", UserProgress.onCourseStatusCheck);
-router.get("/batch", UserProgress.onBatchCreate);
+router.post("/batch", UserProgress.onBatchCreate);
 
 export default router;
