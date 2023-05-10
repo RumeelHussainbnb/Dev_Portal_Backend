@@ -32,7 +32,17 @@ export default {
     try {
       const { id } = req.params;
       const course = await Course.findById(id);
-      res.status(200).json({ success: true, data: course });
+      const nextCourse = await Course.findOne({
+        previousCourse: course._id,
+      });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          course,
+          nextCourse: nextCourse._id || null,
+        },
+      });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
