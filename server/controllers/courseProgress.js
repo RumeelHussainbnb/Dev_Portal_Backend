@@ -108,7 +108,8 @@ export default {
           continue; // continue the loop even if there's an error
         }
       }
-      const userProgress = await UserProgress.find({ userId: userId });
+      const userProgress = await UserProgress.find({ UserId: userId });
+
 
       res.status(200).json({ success: true, data: userProgress });
     } catch (error) {

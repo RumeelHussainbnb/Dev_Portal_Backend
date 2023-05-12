@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import config from "./index.js";
 
 // const CONNECTION_URL = `mongodb://${config.db.url}/${config.db.name}`;
-// const CONNECTION_URL = `mongodb+srv://shahzaib_nahi_ha:IsThisForShahzaib_@cluster0.updhl9l.mongodb.net/staging_bnb_chain_shahzaib`;
 const CONNECTION_URL = `mongodb://127.0.0.1:27017/bnb`;
 
 mongoose.connect(CONNECTION_URL, {
