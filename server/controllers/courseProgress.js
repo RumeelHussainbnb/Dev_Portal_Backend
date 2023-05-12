@@ -15,7 +15,6 @@ export default {
           UserId: userId,
         });
       }
-      console.log(CourseProgress);
       res.status(200).json({ success: true, data: CourseProgress });
     } catch (error) {
       res.status(400).json({
@@ -42,11 +41,6 @@ export default {
     try {
       const data = req.body;
       // update user progress
-      console.log(data);
-      console.log({
-        UserId: mongoose.Types.ObjectId(data.userId),
-        CourseId: mongoose.Types.ObjectId(data.courseId),
-      });
 
       const progress = await UserProgress.findOneAndUpdate(
         {
@@ -60,12 +54,9 @@ export default {
           new: true,
         }
       );
-      console.log(progress);
       const previousCourse = await Course.findOne({ _id: data.courseId });
-      console.log("previous course", previousCourse.previousCourse);
       //only update if the course has previous course
       if (previousCourse.previousCourse !== null) {
-        console.log("previous course", previousCourse.previousCourse);
         progress.PreviousCourseId = previousCourse.previousCourse;
         await progress.save();
       }
@@ -104,8 +95,7 @@ export default {
   onBatchCreate: async (req, res) => {
     try {
       const { userId } = req.body;
-      console.log(req);
-      console.log(userId);
+
       const courses = await Course.find();
       const coursesId = courses.map((course) => course._id);
       for (let i = 0; i < coursesId.length; i++) {
