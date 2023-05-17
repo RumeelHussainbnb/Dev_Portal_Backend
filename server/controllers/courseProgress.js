@@ -6,8 +6,8 @@ export default {
     try {
       const { courseId, userId } = req.body;
       let CourseProgress = await UserProgress.findOne({
-        CourseId: courseId,
-        UserId: userId,
+        CourseId: mongoose.Types.ObjectId(courseId),
+        UserId: mongoose.Types.ObjectId(userId),
       });
       if (!CourseProgress) {
         CourseProgress = await UserProgress.create({
@@ -26,8 +26,10 @@ export default {
 
   onGetUserProgress: async (req, res) => {
     try {
-      const { userId } = req.query;
-      const userProgress = await UserProgress.find({ userId: userId });
+      const userId = mongoose.Types.ObjectId(req.query.userId);
+      const userProgress = await UserProgress.find({
+        UserId: userId,
+      });
       res.status(200).json({ success: true, data: userProgress });
     } catch (error) {
       res.status(400).json({
@@ -54,7 +56,9 @@ export default {
           new: true,
         }
       );
-      const previousCourse = await Course.findOne({ _id: data.courseId });
+      const previousCourse = await Course.findOne({
+        _id: mongoose.Types.ObjectId(data.courseId),
+      });
       //only update if the course has previous course
       if (previousCourse.previousCourse !== null) {
         progress.PreviousCourseId = previousCourse.previousCourse;
@@ -73,8 +77,8 @@ export default {
     try {
       const { courseId, userId } = req.params;
       const CourseProgress = await UserProgress.findOne({
-        UserId: userId,
-        CourseId: courseId,
+        UserId: mongoose.Types.ObjectId(userId),
+        CourseId: mongoose.Types.ObjectId(courseId),
       });
       if (!CourseProgress) {
         const userProgress = await UserProgress.create({
@@ -108,8 +112,9 @@ export default {
           continue; // continue the loop even if there's an error
         }
       }
-      const userProgress = await UserProgress.find({ UserId: userId });
-
+      const userProgress = await UserProgress.find({
+        UserId: mongoose.Types.ObjectId(userId),
+      });
 
       res.status(200).json({ success: true, data: userProgress });
     } catch (error) {
