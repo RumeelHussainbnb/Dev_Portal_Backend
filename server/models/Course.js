@@ -1,31 +1,23 @@
 import mongoose from "mongoose";
 
 const CourseSchema = new mongoose.Schema({
-  name: {
+  title: {
     type: String,
     required: true,
   },
-  section: {
+  description: {
+    type: String,
+  },
+  slug: {
     type: String,
     required: true,
   },
-  markDownContent: {
-    type: String,
-    required: [true, "Please add a markdown content"],
-    trim: true,
-  },
-  previousCourse: {
-    type: mongoose.Types.ObjectId,
-    ref: "Course",
-  },
-  createdDate: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedDate: {
-    type: Date,
-    default: Date.now,
-  },
+  moduleId: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "Module",
+    },
+  ],
 });
 
 export default mongoose.model("Course", CourseSchema);
