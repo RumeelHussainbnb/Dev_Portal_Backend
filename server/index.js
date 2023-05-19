@@ -17,7 +17,9 @@ import martianRouter from "./routes/martian.js";
 import activityRouter from "./routes/activity.js";
 import quizRouter from "./routes/quiz.js";
 import userProgressRouter from "./routes/UserProgress.js";
-import courseRouter from "./routes/course.js";
+import lessonRouter from "./routes/lesson.js";
+import modulesRouter from "./routes/modules.js";
+import courseRouter from "./routes/courses.js";
 
 const app = express();
 dotenv.config();
@@ -51,6 +53,8 @@ app.use("/martian", martianRouter);
 app.use("/activity", activityRouter);
 app.use("/quiz", quizRouter);
 app.use("/userProgress", userProgressRouter);
+app.use("/lesson", lessonRouter);
+app.use("/modules", modulesRouter);
 app.use("/course", courseRouter);
 app.use("/", adminRouter);
 

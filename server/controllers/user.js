@@ -1,6 +1,6 @@
 // models
 import User from "../models/User.js";
-import Course from "../models/Course.js";
+import Lesson from "../models/Lesson.js";
 import UserProgress from "../models/UserProgress.js";
 import { Member, Role } from "../constant/enums.js";
 import mongoose from "mongoose";
@@ -434,13 +434,13 @@ export default {
         const userId = user._id;
 
         // Get all courses
-        const courses = await Course.find({}, { _id: 1 });
+        const Lessons = await Lesson.find({}, { _id: 1 });
 
         // Get all Course id
-        const courseIds = courses.map((course) => course._id);
+        const lessonIds = Lessons.map((course) => course._id);
 
         // create course record
-        const userProgress = courseIds.map(async (courseId) => {
+        const userProgress = lessonIds.map(async (courseId) => {
           await UserProgress.create({
             UserId: userId,
             CourseId: courseId,

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Course from "../models/Course.js";
+import Course from "../models/Courses.js";
 import UserProgress from "../models/UserProgress.js";
 export default {
   onFindOrCreateCourseProgress: async (req, res) => {

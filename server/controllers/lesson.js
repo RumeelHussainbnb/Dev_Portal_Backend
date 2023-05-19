@@ -7,13 +7,13 @@ export default {
       let findLesson;
       findLesson = await Lesson.find().sort({ id: -1 }).limit(1);
       findLesson = findLesson.length > 0 ? findLesson[0]._id : null;
-      const Lesson = await Lesson.create({
+      const lesson = await Lesson.create({
         name: data.name,
-        markDownContent: data.markdown,
+        markDownContent: data.markDownContent,
         section: data.section,
         previousLesson: findLesson,
       });
-      res.status(201).json({ success: true, data: Lesson });
+      res.status(201).json({ success: true, data: lesson });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
@@ -21,7 +21,7 @@ export default {
 
   onGetAllLesson: async (req, res) => {
     try {
-      const Lesson = await Lesson.find();
+      const lesson = await Lesson.find();
       res.status(200).json({ success: true, data: Lesson });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
@@ -31,7 +31,7 @@ export default {
   onGetLessonById: async (req, res) => {
     try {
       const { id } = req.params;
-      const Lesson = await Lesson.findById(id);
+      const lesson = await Lesson.findById(id);
       const nextLesson = await Lesson.findOne({
         previousLesson: Lesson._id,
       });
@@ -52,7 +52,7 @@ export default {
     try {
       const { id } = req.params;
       const data = req.body;
-      const Lesson = await Lesson.findByIdAndUpdate(
+      const lesson = await Lesson.findByIdAndUpdate(
         { _id: id },
         {
           name: data.name,
@@ -70,14 +70,14 @@ export default {
     try {
       const { id } = req.params;
       const data = req.body;
-      const Lesson = await Lesson.findById(id);
-      const LessonContent = await LessonContent.findByIdAndUpdate(
-        { _id: Lesson.content },
+      const lesson = await Lesson.findByIdAndUpdate(
+        { _id: id },
         {
           content: data.markDown,
         }
       );
-      res.status(200).json({ success: true, data: LessonContent });
+
+      res.status(200).json({ success: true, data: lesson });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
@@ -88,7 +88,6 @@ export default {
       const { id } = req.params;
 
       await Lesson.findByIdAndDelete(id);
-      await LessonContent.findByIdAndDelete(Lesson.content);
       res.status(200).json({ success: true });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
