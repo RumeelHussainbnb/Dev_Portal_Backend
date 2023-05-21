@@ -1,19 +1,20 @@
 import Lesson from "../models/Lesson.js";
+import modules from "./modules.js";
 
 export default {
   onCreateLesson: async (req, res) => {
     try {
       const data = req.body;
       let findLesson;
-      findLesson = await Lesson.find().sort({ id: -1 }).limit(1);
+      findLesson = await Lesson.find().sort({ createdDate: -1 }).limit(1);
       findLesson = findLesson.length > 0 ? findLesson[0]._id : null;
       const lesson = await Lesson.create({
         name: data.name,
         markDownContent: data.markDownContent,
-        section: data.section,
         previousLesson: findLesson,
       });
-      res.status(201).json({ success: true, data: lesson });
+      const module = modules.onUpdateModuleLesson(data.moduleId, lesson._id);
+      res.status(201).json({ success: true, data: lesson, module: module });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
@@ -22,7 +23,7 @@ export default {
   onGetAllLesson: async (req, res) => {
     try {
       const lesson = await Lesson.find();
-      res.status(200).json({ success: true, data: Lesson });
+      res.status(200).json({ success: true, data: lesson });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
@@ -39,7 +40,7 @@ export default {
       res.status(200).json({
         success: true,
         data: {
-          Lesson,
+          lesson,
           nextLesson: nextLesson._id || null,
         },
       });

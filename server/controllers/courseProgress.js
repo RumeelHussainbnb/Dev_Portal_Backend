@@ -7,6 +7,7 @@ export default {
       const { courseId, userId } = req.body;
       let CourseProgress = await UserProgress.findOne({
         CourseId: mongoose.Types.ObjectId(courseId),
+        LessonId: mongoose.Types.ObjectId(courseId),
         UserId: mongoose.Types.ObjectId(userId),
       });
       if (!CourseProgress) {
@@ -47,7 +48,7 @@ export default {
       const progress = await UserProgress.findOneAndUpdate(
         {
           UserId: mongoose.Types.ObjectId(data.userId),
-          CourseId: mongoose.Types.ObjectId(data.courseId),
+          LessonId: mongoose.Types.ObjectId(data.lessonId),
         },
         {
           completed: data.complete,
@@ -57,7 +58,7 @@ export default {
         }
       );
       const previousCourse = await Course.findOne({
-        _id: mongoose.Types.ObjectId(data.courseId),
+        _id: mongoose.Types.ObjectId(data.lessonId),
       });
       //only update if the course has previous course
       if (previousCourse.previousCourse !== null) {

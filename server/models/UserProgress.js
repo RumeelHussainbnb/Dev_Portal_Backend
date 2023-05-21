@@ -1,17 +1,20 @@
 import mongoose from "mongoose";
 
 const UserProgressSchema = new mongoose.Schema({
-  CourseId: {
+  LessonId: {
     type: mongoose.Schema.ObjectId,
-    ref: "Course",
+    ref: "Lesson",
   },
   UserId: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
   },
-  PreviousCourseId: {
+  PreviousLessonId: {
     type: mongoose.Schema.ObjectId,
-    ref: "Course",
+    ref: "Lesson",
+  },
+  CourseId: {
+    type: String,
   },
   completed: {
     type: Boolean,
@@ -23,6 +26,6 @@ const UserProgressSchema = new mongoose.Schema({
     // required: true
   },
 });
-UserProgressSchema.index({ UserId: 1, CourseId: 1 }, { unique: true });
+UserProgressSchema.index({ UserId: 1, LessonId: 1 }, { unique: true });
 
 export default mongoose.model("UserProgress", UserProgressSchema);

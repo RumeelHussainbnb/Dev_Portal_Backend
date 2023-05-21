@@ -34,4 +34,16 @@ export default {
       res.status(400).json({ success: false, error: error });
     }
   },
+  onUpdateModuleLesson: async (moduleId, lessonId) => {
+    try {
+      console.log(moduleId, lessonId);
+      const module = await Modules.findById(moduleId);
+      module.lessonId.push(lessonId);
+      await module.save();
+      console.log(module);
+      return module;
+    } catch (error) {
+      console.log(error);
+    }
+  },
 };

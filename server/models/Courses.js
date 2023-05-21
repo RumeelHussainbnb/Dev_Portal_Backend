@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
 
 const CourseSchema = new mongoose.Schema({
-  title: {
+  shortTitle: {
+    type: String,
+    required: true,
+  },
+  longTitle: {
     type: String,
     required: true,
   },
