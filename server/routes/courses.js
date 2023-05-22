@@ -9,5 +9,6 @@ router.post("/", course.onCreateCourse);
 router.put("/:id", course.onUpdateCourse);
 router.get("/only-name", course.onOnlyReturnName);
 router.get("/full-course/:id", course.onGetFullCourse);
+router.get("/:slug", course.onGetCourseBySlug);
 
 export default router;

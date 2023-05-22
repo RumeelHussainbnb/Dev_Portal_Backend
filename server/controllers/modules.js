@@ -1,16 +1,23 @@
 import Modules from "../models/modules.js";
+import courses from "./courses.js";
 
 export default {
   onCreateModule: async (req, res) => {
     try {
+      const { name, courseId } = req.body;
+      console.log(req.body);
       const module = await Modules.create({
-        name: req.body.name,
+        name: name,
       });
-      res.status(201).json({ success: true, data: module });
+      console.log(module);
+      const course = await courses.onUpdateCourseModule(module._id, courseId);
+      res.status(201).json({ success: true, data: module, course: course });
     } catch (error) {
+      console.log(error);
       res.status(400).json({ success: false, error: error });
     }
   },
+
   onGetAllModules: async (req, res) => {
     try {
       const modules = await Modules.find();
@@ -19,6 +26,7 @@ export default {
       res.status(400).json({ success: false, error: error });
     }
   },
+
   onUpdateModules: async (req, res) => {
     try {
       const { data } = req.body;
@@ -34,13 +42,12 @@ export default {
       res.status(400).json({ success: false, error: error });
     }
   },
+
   onUpdateModuleLesson: async (moduleId, lessonId) => {
     try {
-      console.log(moduleId, lessonId);
       const module = await Modules.findById(moduleId);
       module.lessonId.push(lessonId);
       await module.save();
-      console.log(module);
       return module;
     } catch (error) {
       console.log(error);

@@ -57,11 +57,10 @@ export default {
         { _id: id },
         {
           name: data.name,
-          description: data.description,
-          section: data.section,
+          markDownContent: data.markDownContent,
         }
       );
-      res.status(200).json({ success: true, data: Lesson });
+      res.status(200).json({ success: true, data: lesson });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
@@ -100,7 +99,7 @@ export default {
       const { id } = req.params;
       const content = await Lesson.findById({
         _id: id,
-      }).populate("User");
+      });
       const nextContent = await Lesson.findOne({
         previousContent: content._id,
       });
@@ -109,4 +108,5 @@ export default {
       res.status(400).json({ success: false, error: error });
     }
   },
+  
 };

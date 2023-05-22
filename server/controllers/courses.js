@@ -4,8 +4,10 @@ import Course from "../models/Courses.js";
 export default {
   onCreateCourse: async (req, res) => {
     try {
+      console.log(req.body);
       const course = await Course.create({
-        title: req.body.title,
+        shortTitle: req.body.shortTitle,
+        longTitle: req.body.longTitle,
         description: req.body.description,
         slug: req.body.slug,
       });
@@ -26,14 +28,7 @@ export default {
     try {
       const { id } = req.params;
       const data = req.body;
-      const course = await Course.findByIdAndUpdate(
-        { _id: id },
-        {
-          title: data.title,
-          description: data.description,
-          slug: data.slug,
-        }
-      );
+      const course = await Course.findByIdAndUpdate({ _id: id }, data);
       res.status(200).json({ success: true, data: course });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
@@ -45,6 +40,17 @@ export default {
       res.status(200).json({ success: true, data: course });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
+    }
+  },
+
+  onUpdateCourseModule: async (moduleId, courseId) => {
+    try {
+      const course = await Course.findById(courseId);
+      course.moduleId.push(moduleId);
+      await course.save();
+      return course;
+    } catch (error) {
+      console.log(error);
     }
   },
 
@@ -94,6 +100,16 @@ export default {
       res.status(200).json({ success: true, data: course[0] });
     } catch (error) {
       console.log(error);
+      res.status(400).json({ success: false, error: error });
+    }
+  },
+
+  onGetCourseBySlug: async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const course = await Course.findOne({ slug: slug });
+      res.status(200).json({ success: true, data: course });
+    } catch (error) {
       res.status(400).json({ success: false, error: error });
     }
   },
