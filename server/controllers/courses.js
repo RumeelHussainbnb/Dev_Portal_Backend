@@ -113,4 +113,55 @@ export default {
       res.status(400).json({ success: false, error: error });
     }
   },
+
+  onGetFullCourseBySlug: async (req, res) => {
+    try {
+      const { slug } = req.params;
+      console.log(req.params);
+      console.log(slug);
+      const course = await Course.aggregate([
+        {
+          $match: { slug: slug }, // Match the specific course by its ID
+        },
+        {
+          $lookup: {
+            from: "modules",
+            localField: "moduleId",
+            foreignField: "_id",
+            as: "modules",
+          },
+        },
+        {
+          $unwind: "$modules",
+        },
+        {
+          $lookup: {
+            from: "lessons",
+            localField: "modules.lessonId",
+            foreignField: "_id",
+            as: "modules.lessons",
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            longTitle: { $first: "$longTitle" },
+            shortTitle: { $first: "$shortTitle" },
+            description: { $first: "$description" },
+            slug: { $first: "$slug" },
+            modules: {
+              $push: {
+                _id: "$modules._id",
+                name: "$modules.name",
+                lessons: "$modules.lessons",
+              },
+            },
+          },
+        },
+      ]);
+      res.status(200).json({ success: true, data: course[0] });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error });
+    }
+  },
 };
