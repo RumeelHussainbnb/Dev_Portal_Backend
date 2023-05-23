@@ -29,10 +29,12 @@ export default {
 
   onGetUserProgress: async (req, res) => {
     try {
-      const { userId } = req.query;
+      const { userId, courseId } = req.body;
       const userProgress = await UserProgress.find({
         UserId: userId,
+        CourseId: courseId,
       });
+
       res.status(200).json({ success: true, data: userProgress });
     } catch (error) {
       res.status(400).json({
@@ -44,13 +46,13 @@ export default {
 
   onUpdateUserProgress: async (req, res) => {
     try {
-      const data = req.body;
-      // update user progress
+      const { userId, lessonId } = req.body;
 
+      // update user progress
       const progress = await UserProgress.findOneAndUpdate(
         {
-          UserId: mongoose.Types.ObjectId(data.userId),
-          LessonId: mongoose.Types.ObjectId(data.lessonId),
+          UserId: userId,
+          LessonId: lessonId,
         },
         {
           completed: data.complete,
@@ -59,7 +61,8 @@ export default {
           new: true,
         }
       );
-      const previousCourse = await Course.findOne({
+
+      const previousCourse = await Lesson.findOne({
         _id: mongoose.Types.ObjectId(data.lessonId),
       });
       //only update if the course has previous course
@@ -109,7 +112,6 @@ export default {
       for (const courseId in courses) {
         // For each courseId, get its array of lessonIds
         const lessonIds = courses[courseId];
-
         // For each lessonId, create a UserProgress record
         for (const lessonId of lessonIds) {
           try {
@@ -118,7 +120,6 @@ export default {
               LessonId: lessonId,
               CourseId: courseId,
             });
-            console.log("success");
           } catch (error) {
             console.log(error);
             continue; // continue the loop even if there's an error
