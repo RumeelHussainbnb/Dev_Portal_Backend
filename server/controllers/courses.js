@@ -43,20 +43,22 @@ export default {
     }
   },
 
-  onUpdateCourseModule: async (moduleId, courseId) => {
+  onUpdateCourseModule: async (moduleId, courseSlug) => {
     try {
-      const course = await Course.findById(courseId);
+      const course = await Course.findOne(courseSlug);
       course.moduleId.push(moduleId);
       await course.save();
       return course;
     } catch (error) {
       console.log(error);
+      return error;
     }
   },
 
   onGetFullCourse: async (req, res) => {
     try {
       const { id } = req.params;
+      console.log(id);
       const course = await Course.aggregate([
         {
           $match: { _id: mongoose.Types.ObjectId(id) }, // Match the specific course by its ID
@@ -70,7 +72,10 @@ export default {
           },
         },
         {
-          $unwind: "$modules",
+          $unwind: {
+            path: "$modules",
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
           $lookup: {
@@ -96,8 +101,8 @@ export default {
           },
         },
       ]);
-
-      res.status(200).json({ success: true, data: course[0] });
+      console.log(course);
+      res.status(200).json({ success: true, data: course });
     } catch (error) {
       console.log(error);
       res.status(400).json({ success: false, error: error });
@@ -117,8 +122,6 @@ export default {
   onGetFullCourseBySlug: async (req, res) => {
     try {
       const { slug } = req.params;
-      console.log(req.params);
-      console.log(slug);
       const course = await Course.aggregate([
         {
           $match: { slug: slug }, // Match the specific course by its ID
@@ -132,7 +135,10 @@ export default {
           },
         },
         {
-          $unwind: "$modules",
+          $unwind: {
+            path: "$modules",
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
           $lookup: {
@@ -159,7 +165,7 @@ export default {
           },
         },
       ]);
-      res.status(200).json({ success: true, data: course[0] });
+      res.status(200).json({ success: true, data: course });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
     }

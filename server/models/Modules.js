@@ -9,8 +9,11 @@ const ModuleSchema = new mongoose.Schema({
     {
       type: mongoose.Types.ObjectId,
       ref: "Lesson",
+      default: [],
     },
   ],
 });
+
+ModuleSchema.index({ name: 1 }, { unique: true });
 
 export default mongoose.model("Module", ModuleSchema);

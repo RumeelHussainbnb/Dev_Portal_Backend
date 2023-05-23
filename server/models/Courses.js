@@ -20,8 +20,11 @@ const CourseSchema = new mongoose.Schema({
     {
       type: mongoose.Types.ObjectId,
       ref: "Module",
+      default: [],
     },
   ],
 });
+
+CourseSchema.index({ slug: 1 }, { unique: true });
 
 export default mongoose.model("Course", CourseSchema);

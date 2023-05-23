@@ -13,7 +13,10 @@ export default {
         markDownContent: data.markDownContent,
         previousLesson: findLesson,
       });
-      const module = modules.onUpdateModuleLesson(data.moduleId, lesson._id);
+      const module = await modules.onUpdateModuleLesson(
+        data.moduleId,
+        lesson._id
+      );
       res.status(201).json({ success: true, data: lesson, module: module });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
@@ -108,5 +111,4 @@ export default {
       res.status(400).json({ success: false, error: error });
     }
   },
-  
 };
