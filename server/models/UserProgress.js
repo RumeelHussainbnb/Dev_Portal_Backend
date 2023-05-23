@@ -14,7 +14,8 @@ const UserProgressSchema = new mongoose.Schema({
     ref: "Lesson",
   },
   CourseId: {
-    type: String,
+    type: mongoose.Schema.ObjectId,
+    ref: "Course",
   },
   completed: {
     type: Boolean,
@@ -26,6 +27,9 @@ const UserProgressSchema = new mongoose.Schema({
     // required: true
   },
 });
-UserProgressSchema.index({ UserId: 1, LessonId: 1 }, { unique: true });
+UserProgressSchema.index(
+  { UserId: 1, LessonId: 1, CourseId: 1 },
+  { unique: true }
+);
 
 export default mongoose.model("UserProgress", UserProgressSchema);

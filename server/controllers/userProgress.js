@@ -1,14 +1,16 @@
 import mongoose from "mongoose";
-import Course from "../models/Courses.js";
+import Lesson from "../models/Lesson.js";
 import UserProgress from "../models/UserProgress.js";
+import course from "./courses.js";
+
 export default {
   onFindOrCreateCourseProgress: async (req, res) => {
     try {
-      const { courseId, userId } = req.body;
+      const { courseId, lessonId, userId } = req.body;
       let CourseProgress = await UserProgress.findOne({
-        CourseId: mongoose.Types.ObjectId(courseId),
-        LessonId: mongoose.Types.ObjectId(courseId),
-        UserId: mongoose.Types.ObjectId(userId),
+        CourseId: courseId,
+        LessonId: lessonId,
+        UserId: userId,
       });
       if (!CourseProgress) {
         CourseProgress = await UserProgress.create({
@@ -27,7 +29,7 @@ export default {
 
   onGetUserProgress: async (req, res) => {
     try {
-      const userId = mongoose.Types.ObjectId(req.query.userId);
+      const { userId } = req.query;
       const userProgress = await UserProgress.find({
         UserId: userId,
       });
@@ -76,15 +78,15 @@ export default {
 
   onCourseStatusCheck: async (req, res) => {
     try {
-      const { courseId, userId } = req.params;
+      const { lessonId, userId } = req.params;
       const CourseProgress = await UserProgress.findOne({
-        UserId: mongoose.Types.ObjectId(userId),
-        CourseId: mongoose.Types.ObjectId(courseId),
+        UserId: userId,
+        LessonId: lessonId,
       });
       if (!CourseProgress) {
         const userProgress = await UserProgress.create({
           UserId: userId,
-          CourseId: courseId,
+          LessonId: lessonId,
         });
         res.status(200).json({ success: true, data: userProgress });
       }
@@ -101,20 +103,31 @@ export default {
     try {
       const { userId } = req.body;
 
-      const courses = await Course.find();
-      const coursesId = courses.map((course) => course._id);
-      for (let i = 0; i < coursesId.length; i++) {
-        try {
-          await UserProgress.create({
-            UserId: userId,
-            CourseId: coursesId[i],
-          });
-        } catch (error) {
-          continue; // continue the loop even if there's an error
+      const courses = await course.onGetAllIds();
+
+      // Iterate through each courseId in courses
+      for (const courseId in courses) {
+        // For each courseId, get its array of lessonIds
+        const lessonIds = courses[courseId];
+
+        // For each lessonId, create a UserProgress record
+        for (const lessonId of lessonIds) {
+          try {
+            await UserProgress.create({
+              UserId: userId,
+              LessonId: lessonId,
+              CourseId: courseId,
+            });
+            console.log("success");
+          } catch (error) {
+            console.log(error);
+            continue; // continue the loop even if there's an error
+          }
         }
       }
+
       const userProgress = await UserProgress.find({
-        UserId: mongoose.Types.ObjectId(userId),
+        UserId: userId,
       });
 
       res.status(200).json({ success: true, data: userProgress });

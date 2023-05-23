@@ -170,4 +170,25 @@ export default {
       res.status(400).json({ success: false, error: error });
     }
   },
+
+  onGetAllIds: async () => {
+    const courses = await Course.find()
+      .select("_id")
+      .populate({
+        path: "moduleId", // replace with your field name
+        select: "_id",
+        populate: {
+          path: "lessonId", // replace with your field name
+          select: "_id",
+        },
+      });
+    const result = courses.reduce((acc, course) => {
+      const lessons = (course.moduleId || []).reduce((acc, module) => {
+        return [...acc, ...module.lessonId.map((lesson) => lesson._id)];
+      }, []);
+      acc[course._id] = lessons;
+      return acc;
+    }, {});
+    return result;
+  },
 };
