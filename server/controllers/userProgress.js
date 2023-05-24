@@ -68,11 +68,11 @@ export default {
           previousLessonCompleted = isCompleted;
         }
 
-        updatedCourse.moduleId.push(updatedModule);
-        updatedCourse.totalLesson = updatedModule.lessonId.length;
-        updatedCourse.totalCompletedLesson = updatedModule.lessonId.filter(
+        updatedModule.totalLesson = updatedModule.lessonId.length;
+        updatedModule.totalCompletedLesson = updatedModule.lessonId.filter(
           (lesson) => lesson.completed
         ).length;
+        updatedCourse.moduleId.push(updatedModule);
       }
 
       res.status(200).json({ success: true, data: updatedCourse });
