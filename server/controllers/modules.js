@@ -8,11 +8,9 @@ export default {
       const module = await Modules.create({
         name: name,
       });
-      console.log(module);
       const course = await courses.onUpdateCourseModule(module._id, courseSlug);
       res.status(201).json({ success: true, data: module, course: course });
     } catch (error) {
-      console.log(error);
       res.status(400).json({ success: false, error: error });
     }
   },
@@ -39,7 +37,6 @@ export default {
   onUpdateModules: async (req, res) => {
     try {
       const data = req.body;
-      console.log(req.body);
       const module = await Modules.findByIdAndUpdate(
         { _id: data?.id },
         {
@@ -49,7 +46,6 @@ export default {
       );
       res.status(200).json({ success: true, data: module });
     } catch (error) {
-      console.log(error);
       res.status(400).json({ success: false, error: error });
     }
   },
@@ -61,7 +57,6 @@ export default {
       await module.save();
       return module.lessonId;
     } catch (error) {
-      console.log(error);
       return error;
     }
   },

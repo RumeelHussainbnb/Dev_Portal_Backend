@@ -4,7 +4,6 @@ import Course from "../models/Courses.js";
 export default {
   onCreateCourse: async (req, res) => {
     try {
-      console.log(req.body);
       const course = await Course.create({
         shortTitle: req.body.shortTitle,
         longTitle: req.body.longTitle,
@@ -50,7 +49,6 @@ export default {
       await course.save();
       return course;
     } catch (error) {
-      console.log(error);
       return error;
     }
   },
@@ -58,7 +56,6 @@ export default {
   onGetFullCourse: async (req, res) => {
     try {
       const { id } = req.params;
-      console.log(id);
       const course = await Course.aggregate([
         {
           $match: { _id: mongoose.Types.ObjectId(id) }, // Match the specific course by its ID
@@ -101,10 +98,8 @@ export default {
           },
         },
       ]);
-      console.log(course);
       res.status(200).json({ success: true, data: course });
     } catch (error) {
-      console.log(error);
       res.status(400).json({ success: false, error: error });
     }
   },
@@ -171,24 +166,18 @@ export default {
     }
   },
 
-  onGetAllIds: async () => {
-    const courses = await Course.find()
+  onGetAllIdForCourse: async (courseId) => {
+    const course = await Course.findById(courseId)
       .select("_id")
       .populate({
-        path: "moduleId", // replace with your field name
+        path: "moduleId",
         select: "_id",
         populate: {
-          path: "lessonId", // replace with your field name
+          path: "lessonId",
           select: "_id",
         },
       });
-    const result = courses.reduce((acc, course) => {
-      const lessons = (course.moduleId || []).reduce((acc, module) => {
-        return [...acc, ...module.lessonId.map((lesson) => lesson._id)];
-      }, []);
-      acc[course._id] = lessons;
-      return acc;
-    }, {});
-    return result;
+
+    return course;
   },
 };

@@ -9,9 +9,9 @@ const UserProgressSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: "User",
   },
-  PreviousLessonId: {
+  ModuleId: {
     type: mongoose.Schema.ObjectId,
-    ref: "Lesson",
+    ref: "Module",
   },
   CourseId: {
     type: mongoose.Schema.ObjectId,
@@ -28,7 +28,7 @@ const UserProgressSchema = new mongoose.Schema({
   },
 });
 UserProgressSchema.index(
-  { UserId: 1, LessonId: 1, CourseId: 1 },
+  { UserId: 1, LessonId: 1, CourseId: 1,  },
   { unique: true }
 );
 

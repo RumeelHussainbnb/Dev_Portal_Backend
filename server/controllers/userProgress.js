@@ -1,20 +1,21 @@
-import mongoose from "mongoose";
-import Lesson from "../models/Lesson.js";
 import UserProgress from "../models/UserProgress.js";
 import course from "./courses.js";
 
 export default {
   onFindOrCreateCourseProgress: async (req, res) => {
     try {
-      const { courseId, lessonId, userId } = req.body;
+      const { courseId, lessonId, userId, moduleId } = req.body;
       let CourseProgress = await UserProgress.findOne({
         CourseId: courseId,
         LessonId: lessonId,
+        ModuleId: moduleId,
         UserId: userId,
       });
       if (!CourseProgress) {
         CourseProgress = await UserProgress.create({
           CourseId: courseId,
+          LessonId: lessonId,
+          ModuleId: moduleId,
           UserId: userId,
         });
       }
@@ -29,14 +30,54 @@ export default {
 
   onGetUserProgress: async (req, res) => {
     try {
-      const { userId, courseId } = req.body;
+      const { userId, courseId } = req.params;
+
+      const courses = await course.onGetAllIdForCourse(courseId);
+
       const userProgress = await UserProgress.find({
         UserId: userId,
         CourseId: courseId,
       });
 
-      res.status(200).json({ success: true, data: userProgress });
+      const updatedCourse = {
+        _id: courseId,
+        moduleId: [],
+      };
+      let previousLessonCompleted = true;
+
+      for (let module of courses.moduleId) {
+        const updatedModule = {
+          _id: module._id,
+          lessonId: [],
+        };
+
+        for (let lesson of module.lessonId) {
+          const progress = userProgress.find(
+            (progress) => progress.LessonId.toString() === lesson._id.toString()
+          );
+          const isCompleted = progress ? progress.completed : false;
+
+          const updatedLesson = {
+            _id: lesson._id,
+            locked: !previousLessonCompleted,
+            completed: isCompleted,
+            isNotRead: previousLessonCompleted && !isCompleted,
+          };
+
+          updatedModule.lessonId.push(updatedLesson);
+          previousLessonCompleted = isCompleted;
+        }
+
+        updatedCourse.moduleId.push(updatedModule);
+        updatedCourse.totalLesson = updatedModule.lessonId.length;
+        updatedCourse.totalCompletedLesson = updatedModule.lessonId.filter(
+          (lesson) => lesson.completed
+        ).length;
+      }
+
+      res.status(200).json({ success: true, data: updatedCourse });
     } catch (error) {
+      console.log(error);
       res.status(400).json({
         success: false,
         message: error.message,
@@ -46,92 +87,23 @@ export default {
 
   onUpdateUserProgress: async (req, res) => {
     try {
-      const { userId, lessonId } = req.body;
+      const { courseId, lessonId, userId, moduleId, completed } = req.body;
 
-      // update user progress
       const progress = await UserProgress.findOneAndUpdate(
         {
           UserId: userId,
           LessonId: lessonId,
+          CourseId: courseId,
+          ModuleId: moduleId,
         },
         {
-          completed: data.complete,
+          completed: completed,
         },
         {
           new: true,
         }
       );
-
-      const previousCourse = await Lesson.findOne({
-        _id: mongoose.Types.ObjectId(data.lessonId),
-      });
-      //only update if the course has previous course
-      if (previousCourse.previousCourse !== null) {
-        progress.PreviousCourseId = previousCourse.previousCourse;
-        await progress.save();
-      }
       res.status(200).json({ success: true, data: progress });
-    } catch (error) {
-      res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-  },
-
-  onCourseStatusCheck: async (req, res) => {
-    try {
-      const { lessonId, userId } = req.params;
-      const CourseProgress = await UserProgress.findOne({
-        UserId: userId,
-        LessonId: lessonId,
-      });
-      if (!CourseProgress) {
-        const userProgress = await UserProgress.create({
-          UserId: userId,
-          LessonId: lessonId,
-        });
-        res.status(200).json({ success: true, data: userProgress });
-      }
-      res.status(200).json({ success: true, data: CourseProgress.completed });
-    } catch (error) {
-      res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-  },
-
-  onBatchCreate: async (req, res) => {
-    try {
-      const { userId } = req.body;
-
-      const courses = await course.onGetAllIds();
-
-      // Iterate through each courseId in courses
-      for (const courseId in courses) {
-        // For each courseId, get its array of lessonIds
-        const lessonIds = courses[courseId];
-        // For each lessonId, create a UserProgress record
-        for (const lessonId of lessonIds) {
-          try {
-            await UserProgress.create({
-              UserId: userId,
-              LessonId: lessonId,
-              CourseId: courseId,
-            });
-          } catch (error) {
-            console.log(error);
-            continue; // continue the loop even if there's an error
-          }
-        }
-      }
-
-      const userProgress = await UserProgress.find({
-        UserId: userId,
-      });
-
-      res.status(200).json({ success: true, data: userProgress });
     } catch (error) {
       res.status(400).json({
         success: false,
