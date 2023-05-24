@@ -87,14 +87,11 @@ export default {
 
   onUpdateUserProgress: async (req, res) => {
     try {
-      const { courseId, lessonId, userId, moduleId, completed } = req.body;
-
+      const { lessonId, userId, completed } = req.body;
       const progress = await UserProgress.findOneAndUpdate(
         {
           UserId: userId,
           LessonId: lessonId,
-          CourseId: courseId,
-          ModuleId: moduleId,
         },
         {
           completed: completed,
@@ -103,6 +100,23 @@ export default {
           new: true,
         }
       );
+      res.status(200).json({ success: true, data: progress });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  },
+
+  onGetUserProgressByLessonId: async (req, res) => {
+    try {
+      const { userId, lessonId } = req.params;
+      const progress = await UserProgress.findOne({
+        UserId: userId,
+        LessonId: lessonId,
+      });
+      console.log(progress);
       res.status(200).json({ success: true, data: progress });
     } catch (error) {
       res.status(400).json({
