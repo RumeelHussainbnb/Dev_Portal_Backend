@@ -4,20 +4,11 @@ import course from "./courses.js";
 export default {
   onFindOrCreateCourseProgress: async (req, res) => {
     try {
-      const { courseId, lessonId, userId, moduleId } = req.body;
-      let CourseProgress = await UserProgress.findOne({
-        CourseId: courseId,
-        LessonId: lessonId,
-        ModuleId: moduleId,
-        UserId: userId,
-      });
+      const data = req.body;
+      console.log(req.body);
+      let CourseProgress = await UserProgress.findOne(data);
       if (!CourseProgress) {
-        CourseProgress = await UserProgress.create({
-          CourseId: courseId,
-          LessonId: lessonId,
-          ModuleId: moduleId,
-          UserId: userId,
-        });
+        CourseProgress = await UserProgress.create(data);
       }
       res.status(200).json({ success: true, data: CourseProgress });
     } catch (error) {
@@ -116,7 +107,6 @@ export default {
         UserId: userId,
         LessonId: lessonId,
       });
-      console.log(progress);
       res.status(200).json({ success: true, data: progress });
     } catch (error) {
       res.status(400).json({

@@ -42,10 +42,10 @@ export default {
     }
   },
 
-  onUpdateCourseModule: async (moduleId, courseSlug) => {
+  onUpdateCourseModule: async (module, courseSlug) => {
     try {
-      const course = await Course.findOne(courseSlug);
-      course.moduleId.push(moduleId);
+      const course = await Course.findOne({ _id: courseSlug }).exec();
+      course.moduleId.push(module);
       await course.save();
       return course;
     } catch (error) {
