@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 import config from "./index.js";
 
 // const CONNECTION_URL = `mongodb://${config.db.url}/${config.db.name}`;
-// const CONNECTION_URL = `mongodb+srv://${config.db.url}/${config.db.name}`;
-const CONNECTION_URL = `mongodb://127.0.0.1:27017/bnb_test`;
+const CONNECTION_URL = `mongodb+srv://${config.db.url}/${config.db.name}`;
+// const CONNECTION_URL = `mongodb://127.0.0.1:27017/bnb_test`;
 
 mongoose.connect(CONNECTION_URL, {
   useNewUrlParser: true,

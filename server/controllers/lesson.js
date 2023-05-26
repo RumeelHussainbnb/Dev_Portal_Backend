@@ -37,17 +37,24 @@ export default {
       const { id } = req.params;
       const lesson = await Lesson.findById(id);
       const nextLesson = await Lesson.findOne({
-        previousLesson: Lesson._id,
+        previousLesson: id,
       });
 
+      let nextLessonId = "null";
+      if (nextLesson) {
+        nextLessonId = nextLesson._id;
+      }
+
+      console.log(nextLessonId);
       res.status(200).json({
         success: true,
         data: {
           lesson,
-          nextLesson: nextLesson._id || null,
+          nextLesson: nextLessonId,
         },
       });
     } catch (error) {
+      console.log(error);
       res.status(400).json({ success: false, error: error });
     }
   },

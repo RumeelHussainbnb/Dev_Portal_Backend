@@ -24,7 +24,7 @@ export default {
     }
   },
 
-  onGetModuelById: async (req, res) => {
+  onGetModuleById: async (req, res) => {
     try {
       const { id } = req.params;
       const module = await Modules.findById(id);
@@ -37,15 +37,16 @@ export default {
   onUpdateModules: async (req, res) => {
     try {
       const data = req.body;
+      console.log(data);
       const module = await Modules.findByIdAndUpdate(
         { _id: data?.id },
         {
           name: data?.name,
-          lessonId: data?.lessonId,
         }
       );
       res.status(200).json({ success: true, data: module });
     } catch (error) {
+      console.log(error);
       res.status(400).json({ success: false, error: error });
     }
   },
