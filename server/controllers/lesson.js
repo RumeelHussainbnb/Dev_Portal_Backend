@@ -45,7 +45,6 @@ export default {
         nextLessonId = nextLesson._id;
       }
 
-      console.log(nextLessonId);
       res.status(200).json({
         success: true,
         data: {

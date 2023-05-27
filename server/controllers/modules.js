@@ -4,11 +4,13 @@ import courses from "./courses.js";
 export default {
   onCreateModule: async (req, res) => {
     try {
-      const { name, courseSlug } = req.body;
+      const { name, courseId } = req.body;
       const module = await Modules.create({
         name: name,
       });
-      const course = await courses.onUpdateCourseModule(module._id, courseSlug);
+      console.log(module);
+      const course = await courses.onUpdateCourseModule(module._id, courseId);
+      console.log(course);
       res.status(201).json({ success: true, data: module, course: course });
     } catch (error) {
       res.status(400).json({ success: false, error: error });
@@ -53,7 +55,7 @@ export default {
 
   onUpdateModuleLesson: async (moduleId, lessonId) => {
     try {
-      const module = await Modules.findById(moduleId);
+      const module = await Modules.findById(moduleId).exec();
       module.lessonId.push(lessonId);
       await module.save();
       return module.lessonId;
