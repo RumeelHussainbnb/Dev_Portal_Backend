@@ -8,5 +8,6 @@ router.get("/", modules.onGetAllModules);
 router.post("/", modules.onCreateModule);
 router.put("/:id", modules.onUpdateModules);
 router.get("/:id", modules.onGetModuleById);
+router.get("/lesson/:id", modules.onGetModuleIdFromLessonId);
 
 export default router;
