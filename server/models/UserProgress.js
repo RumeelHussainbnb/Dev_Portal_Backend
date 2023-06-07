@@ -28,7 +28,7 @@ const UserProgressSchema = new mongoose.Schema({
   },
 });
 UserProgressSchema.index(
-  { UserId: 1, LessonId: 1, CourseId: 1,  },
+  { UserId: 1, LessonId: 1, CourseId: 1, ModuleId: 1 },
   { unique: true }
 );
 
